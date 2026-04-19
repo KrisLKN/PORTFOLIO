@@ -102,7 +102,7 @@ st.markdown("""
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 PROJET_FINAL_PATH = os.path.join(BASE_PATH, "projet_final")
 IMAGES_RAPPORT_PATH = os.path.join(PROJET_FINAL_PATH, "IMAGES_RAPPORT")
-PBI_PATH = os.path.join(PROJET_FINAL_PATH, "PAGE TABLEAU DE BORD")
+PBI_PATH = os.path.join(PROJET_FINAL_PATH, "PAGE_TABLEAU_DE_BORD")
 
 def load_image(folder, filename):
     path = os.path.join(folder, filename)
@@ -219,7 +219,7 @@ with st.sidebar:
     st.markdown("<br>", unsafe_allow_html=True)
     col_pic1, col_pic2, col_pic3 = st.columns([1, 2, 1])
     with col_pic2:
-        img_profile = load_image(BASE_PATH, "Photo de profil.jpeg")
+        img_profile = load_image(BASE_PATH, "Photo_de_profil.jpeg")
         if img_profile:
             st.image(img_profile, use_container_width=True)
             
@@ -250,6 +250,65 @@ with st.sidebar:
         st.download_button(label=btn_txt, data=cv_data, file_name="Kris_Lokoun_BI_Resume.md", mime="text/markdown", use_container_width=True)
         
     st.markdown("---")
+
+    # Sélection du Projet
+    st.markdown(f"**{'📁 Aperçu de Projet' if L=='FR' else '📁 Project Showcase'}**")
+    project_idx = st.selectbox("Portfolio Project", ["Architecture BI (SAE 4)", "Data Ingestion API (SAE 3)"], label_visibility="collapsed")
+    st.markdown("---")
+
+# ----------------- ROUTING: PROJET SAE 3 (PYTHON API) -----------------
+if "SAE 3" in project_idx:
+    st.markdown(f"<div class='hero-title'>{'Ingénierie des Données & Extraction d\'API' if L=='FR' else 'Data Engineering & API Ingestion'}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='hero-subtitle'>{'Scraping automatisé JSON OpenStreetMap (Python)' if L=='FR' else 'Automated OpenStreetMap JSON Scraping (Python)'}</div>", unsafe_allow_html=True)
+    
+    st.markdown("""
+    <span class='badge-corporate'>Python 3</span>
+    <span class='badge-corporate'>Requests</span>
+    <span class='badge-corporate'>JSON Parsing</span>
+    <span class='badge-corporate'>API REST</span>
+    <span class='badge-corporate'>Geocoding</span>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    col_kpi1, col_kpi2, col_kpi3 = st.columns(3)
+    if L == 'FR':
+        col_kpi1.metric(label="Endpoints Gérés", value="15+", delta="Transports, Santé, Services")
+        col_kpi2.metric(label="Temps de Scan", value="< 1 Sec", delta="Geocoding Nominatim")
+        col_kpi3.metric(label="Format d'Ingestion", value="JSON", delta="Extraction & Tri Automatisé")
+        desc = "Ce projet met en évidence la collecte programmatique de données par l'interrogation d'API complexes (Overpass API, Nominatim). Le script récupère instantanément toute l'infrastructure urbaine d'une ville (gares, hôpitaux, hôtels) via calculs géospatiaux de Bounding Boxes, automatisant complètement l'acquisition de données JSON pour des flux analytiques."
+    else:
+        col_kpi1.metric(label="Managed Endpoints", value="15+", delta="Transit, Health, Amenity")
+        col_kpi2.metric(label="Scan Latency", value="< 1 Sec", delta="Nominatim Geocoding")
+        col_kpi3.metric(label="Ingestion Format", value="JSON", delta="Automated Parsing")
+        desc = "This project demonstrates programmatic data collection by interrogating complex REST APIs (Overpass API, Nominatim). The script instantly extracts the entire urban infrastructure of any given city (stations, hospitals, hotels) via geospatial Bounding Box calculations, completely automating JSON data acquisition for downstream analytical pipelines."
+
+    st.markdown(f"<div class='text-body' style='margin-top:20px;'>{desc}</div>", unsafe_allow_html=True)
+
+    st.markdown(f"<div class='section-header'>{'MOTEUR DE REQUÊTES GÉOSPATIALES' if L=='FR' else 'GEOSPATIAL QUERY ENGINE'}</div>", unsafe_allow_html=True)
+    
+    st.markdown(f"<div class='text-body'>{"Voici un extrait de l'algorithme d'acquisition des nodes OpenStreetMap, simulant l'ingestion d'une source tiers d'entreprise :" if L=='FR' else "Below is an excerpt of the OpenStreetMap node acquisition algorithm, simulating the ingestion of a third-party corporate data source :"}</div>", unsafe_allow_html=True)
+
+    code_snippet = '''import requests
+
+def extract_urban_data(ville):
+    # 1. Extraction Dynamique des Bounding Boxes via Geocoding (Nominatim API)
+    url = "https://nominatim.openstreetmap.org/search"
+    params = {"q": ville, "format": "json", "limit": 1}
+    response = requests.get(url, params=params, headers={"User-Agent": "SAE-Project/1.0"})
+    
+    south, north, west, east = map(float, response.json()[0]["boundingbox"])
+    
+    # 2. Ingestion Modulaire des Infrastructures (Overpass API - Array JSON)
+    bus_url = f"https://overpass-api.de/api/interpreter?data=[out:json];node['highway'='bus_stop']({south},{west},{north},{east});out;"
+    bus_data = requests.get(bus_url).json()["elements"]
+    
+    # Validation et préparation pour la Base de Données
+    print(f"Ingestion réussie : {len(bus_data)} points d'arrêt identifiés.")
+    pass'''
+    
+    st.code(code_snippet, language='python')
+    st.stop() # Arrêt de l'interprétation ici : empêche le projet SAE 4 de se charger en dessous
+
 
 # ----------------- UI: CONTENU PRINCIPAL -----------------
 st.markdown(f"<div class='hero-title'>{content[L][EXP]['intro_title']}</div>", unsafe_allow_html=True)
@@ -408,23 +467,23 @@ tab_titles = ["Synthèse Executive", "Analyse des Ventes", "Intelligence Catalog
 tabs = st.tabs(tab_titles)
 
 with tabs[0]:
-    img_syn = load_image(PBI_PATH, "PAGE DE SYNTHESE.png")
+    img_syn = load_image(PBI_PATH, "PAGE_DE_SYNTHESE.png")
     if img_syn: st.image(img_syn, use_container_width=True)
 
 with tabs[1]:
-    img_ven = load_image(PBI_PATH, "PAGE DE VENTE.png")
+    img_ven = load_image(PBI_PATH, "PAGE_DE_VENTE.png")
     if img_ven: st.image(img_ven, use_container_width=True)
 
 with tabs[2]:
-    img_cat = load_image(PBI_PATH, "PAGE DU CATALOGUE.png")
+    img_cat = load_image(PBI_PATH, "PAGE_DU_CATALOGUE.png")
     if img_cat: st.image(img_cat, use_container_width=True)
 
 with tabs[3]:
-    img_cli = load_image(PBI_PATH, "PAGE DE CLIENTS.png")
+    img_cli = load_image(PBI_PATH, "PAGE_DE_CLIENTS.png")
     if img_cli: st.image(img_cli, use_container_width=True)
 
 with tabs[4]:
-    img_emp = load_image(PBI_PATH, "PAGE DES EMPLOYES.png")
+    img_emp = load_image(PBI_PATH, "PAGE_DES_EMPLOYES.png")
     if img_emp: st.image(img_emp, use_container_width=True)
 
 # ----------------- SECTION IMPACT -----------------
