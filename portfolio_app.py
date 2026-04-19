@@ -21,6 +21,19 @@ st.markdown("""
         font-family: 'Roboto', sans-serif;
     }
     
+    /* Metrics Customization */
+    [data-testid="stMetricValue"] {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #0A192F;
+    }
+    [data-testid="stMetricLabel"] {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #495057;
+        text-transform: uppercase;
+    }
+    
     .hero-title {
         font-size: 2.4rem;
         font-weight: 700;
@@ -228,6 +241,17 @@ with st.sidebar:
     
     st.markdown(f"<p style='text-align: center; color: #495057; font-size: 0.9rem; font-weight: 500; margin-top:15px;'>{content[L][EXP]['role']}</p>", unsafe_allow_html=True)
     st.markdown("---")
+    
+    # Bouton de téléchargement du CV
+    st.markdown(f"**{'📄 Extrait CV (ATS)' if L=='FR' else '📄 ATS Resume Block'}**")
+    cv_path = os.path.join(BASE_PATH, "CV_Resume_Projet_SAE4.md")
+    if os.path.exists(cv_path):
+        with open(cv_path, "r", encoding="utf-8") as f:
+            cv_data = f.read()
+        btn_txt = "Télécharger (.md)" if L == 'FR' else "Download (.md)"
+        st.download_button(label=btn_txt, data=cv_data, file_name="Kris_Lokoun_BI_Resume.md", mime="text/markdown", use_container_width=True)
+        
+    st.markdown("---")
 
 # ----------------- UI: CONTENU PRINCIPAL -----------------
 st.markdown(f"<div class='hero-title'>{content[L][EXP]['intro_title']}</div>", unsafe_allow_html=True)
@@ -241,6 +265,22 @@ st.markdown("""
 <span class='badge-corporate'>DAX</span>
 <span class='badge-corporate'>Python</span>
 """, unsafe_allow_html=True)
+
+# ----------------- SECTION METRICS (KPIs) -----------------
+st.markdown("<br>", unsafe_allow_html=True)
+col_m1, col_m2, col_m3, col_m4 = st.columns(4)
+
+if L == 'FR':
+    col_m1.metric(label="Données (Rows)", value="1.2M+", delta="Croissance massive")
+    col_m2.metric(label="Latence ETL", value="< 3 mins", delta="Opération Nuit", delta_color="off")
+    col_m3.metric(label="Qualité ODS", value="100%", delta="Zéro Rejet")
+    col_m4.metric(label="Dénormalisation", value="3 Niveaux", delta="Temps req. optimisé", delta_color="off")
+else:
+    col_m1.metric(label="Data Volume", value="1.2M+", delta="Massive scaling")
+    col_m2.metric(label="ETL Latency", value="< 3 mins", delta="Overnight batch", delta_color="off")
+    col_m3.metric(label="ODS Integrity", value="100%", delta="Zero Drop")
+    col_m4.metric(label="Denormalization", value="3 Levels", delta="Optimized queries", delta_color="off")
+
 
 st.markdown(f"<div class='text-body' style='margin-top:20px;'>{content[L][EXP]['context']}</div>", unsafe_allow_html=True)
 
@@ -316,28 +356,29 @@ with col_img2:
 st.markdown(f"<div class='section-header'>{content[L][EXP]['viz_title']}</div>", unsafe_allow_html=True)
 st.markdown(f"<div class='text-body'>{content[L][EXP]['viz_text']}</div><br>", unsafe_allow_html=True)
 
-col_dash1, col_dash2 = st.columns(2)
-with col_dash1:
+# Affichage avec Système d'Onglets (Tabs) pour une expérience "Application"
+tab_titles = ["Synthèse Executive", "Analyse des Ventes", "Intelligence Catalogue", "Rétention Client", "Ressources Humaines"] if L == 'FR' else ["Executive Summary", "Sales Analytics", "Catalog Margins", "Customer Retention", "HR Performance"]
+tabs = st.tabs(tab_titles)
+
+with tabs[0]:
     img_syn = load_image(PBI_PATH, "PAGE DE SYNTHESE.png")
-    if img_syn:
-        st.image(img_syn, caption="Executive KPI Dashboard", use_container_width=True)
-        
-    img_cli = load_image(PBI_PATH, "PAGE DE CLIENTS.png")
-    if img_cli:
-        st.image(img_cli, caption="Customer Base Retention Analysis" if L=='EN' else "Analyse de Rétention de la Base Client", use_container_width=True)
-        
-    img_emp = load_image(PBI_PATH, "PAGE DES EMPLOYES.png")
-    if img_emp:
-        st.image(img_emp, caption="HR Performance Monitoring" if L=='EN' else "Suivi Analytique des Ressources Humaines", use_container_width=True)
+    if img_syn: st.image(img_syn, use_container_width=True)
 
-with col_dash2:
+with tabs[1]:
     img_ven = load_image(PBI_PATH, "PAGE DE VENTE.png")
-    if img_ven:
-        st.image(img_ven, caption="Omnichannel Revenue Tracking" if L=='EN' else "Suivi du Chiffre d'Affaires Omnicanal", use_container_width=True)
+    if img_ven: st.image(img_ven, use_container_width=True)
 
+with tabs[2]:
     img_cat = load_image(PBI_PATH, "PAGE DU CATALOGUE.png")
-    if img_cat:
-        st.image(img_cat, caption="Catalog Intelligence & Margins" if L=='EN' else "Intelligence Produit et Marges", use_container_width=True)
+    if img_cat: st.image(img_cat, use_container_width=True)
+
+with tabs[3]:
+    img_cli = load_image(PBI_PATH, "PAGE DE CLIENTS.png")
+    if img_cli: st.image(img_cli, use_container_width=True)
+
+with tabs[4]:
+    img_emp = load_image(PBI_PATH, "PAGE DES EMPLOYES.png")
+    if img_emp: st.image(img_emp, use_container_width=True)
 
 # ----------------- SECTION IMPACT -----------------
 st.markdown(f"<div class='section-header'>{content[L][EXP]['impact_title']}</div>", unsafe_allow_html=True)
