@@ -87,7 +87,7 @@ st.markdown("""
 BASE_PATH = r"c:\Users\LOKOUN Kris\Desktop\projects\Prtfolio STREAMLIT"
 PROJET_FINAL_PATH = os.path.join(BASE_PATH, "projet_final")
 IMAGES_RAPPORT_PATH = os.path.join(PROJET_FINAL_PATH, "IMAGES_RAPPORT")
-PBI_PATH = os.path.join(PROJET_FINAL_PATH, "PBI")
+PBI_PATH = os.path.join(PROJET_FINAL_PATH, "PAGE TABLEAU DE BORD")
 
 @st.cache_data
 def load_image(folder, filename):
@@ -267,20 +267,24 @@ st.markdown(f"<div class='text-body'>{content[L][EXP]['viz_text']}</div><br>", u
 
 col_dash1, col_dash2 = st.columns(2)
 with col_dash1:
-    img_syn = load_image(PBI_PATH, "SYNTHESE.jpg")
+    img_syn = load_image(PBI_PATH, "PAGE DE SYNTHESE.png")
     if img_syn:
         st.image(img_syn, caption="Executive KPI Dashboard", use_container_width=True)
         
-    img_cli = load_image(PBI_PATH, "Analyse Client.png")
+    img_cli = load_image(PBI_PATH, "PAGE DE CLIENTS.png")
     if img_cli:
         st.image(img_cli, caption="Customer Base Retention Analysis" if L=='EN' else "Analyse de Rétention de la Base Client", use_container_width=True)
+        
+    img_emp = load_image(PBI_PATH, "PAGE DES EMPLOYES.png")
+    if img_emp:
+        st.image(img_emp, caption="HR Performance Monitoring" if L=='EN' else "Suivi Analytique des Ressources Humaines", use_container_width=True)
 
 with col_dash2:
-    img_ven = load_image(PBI_PATH, "VENTES.png")
+    img_ven = load_image(PBI_PATH, "PAGE DE VENTE.png")
     if img_ven:
         st.image(img_ven, caption="Omnichannel Revenue Tracking" if L=='EN' else "Suivi du Chiffre d'Affaires Omnicanal", use_container_width=True)
 
-    img_cat = load_image(PBI_PATH, "Catalogue.png")
+    img_cat = load_image(PBI_PATH, "PAGE DU CATALOGUE.png")
     if img_cat:
         st.image(img_cat, caption="Catalog Intelligence & Margins" if L=='EN' else "Intelligence Produit et Marges", use_container_width=True)
 
