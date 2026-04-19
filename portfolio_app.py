@@ -221,6 +221,35 @@ if projet_selectionne == "Composant Décisionnel (SAE 4)":
         img_cata = load_image(PBI_PATH, "Catalogue.png")
         if img_cata:
             st.image(img_cata, caption="Analyse du Catalogue", use_container_width=True)
+            
+        img_emp = load_image(PBI_PATH, "Employes.png")
+        if img_emp:
+            st.image(img_emp, caption="Dashboard des Employés", use_container_width=True)
+
+    # Section 4: Impact et Compétences (Formation)
+    st.markdown("<div class='section-title'>4. Impact sur ma Formation & Compétences Acquises</div>", unsafe_allow_html=True)
+    st.markdown("""
+    <div class='text-body'>
+    Ce projet s'est avéré être un tremplin décisif dans ma formation académique et professionnelle, transformant des connaissances théoriques en <b>compétences d'ingénierie concrètes</b>. Il m'a permis d'appréhender la réalité de la gestion de données en entreprise à travers :
+    <ul>
+        <li><b>La vision systémique d'un projet Data :</b> Comprendre comment chaque brique (de la base brute jusqu'au dashboard de la direction) s'interconnecte.</li>
+        <li><b>La résolution de problèmes techniques complexes :</b> Confronter des problématiques réelles comme la gestion des changements de dimension lents (SCD), les erreurs de typage (<code>DT_I4</code> vs <code>NVARCHAR</code>), et la mise en place de structures dénormalisées pour optimiser le temps de requêtage.</li>
+        <li><b>L'autonomie et le sens du détail :</b> Orchestration totale du flux, automatisation, et rédaction de scripts Python pour la génération de rapports finaux (PDF), prouvant ma capacité à livrer un projet technique de bout en bout de manière professionnelle.</li>
+    </ul>
+    Ces acquis valident mon aptitude à intégrer des équipes Data (BI Engineer, Data Engineer) et à participer activement à la valorisation de la donnée en entreprise.
+    </div>
+    <br>
+    """, unsafe_allow_html=True)
+
+    col_impact1, col_impact2 = st.columns(2)
+    with col_impact1:
+        img_fait_remplie = load_image(IMAGES_RAPPORT_PATH, "AFFICHAGE TABLE DE FAIT REMPLIE.png")
+        if img_fait_remplie:
+            st.image(img_fait_remplie, caption="Aperçu des données consolidées", use_container_width=True)
+    with col_impact2:
+        img_archi_globale = load_image(IMAGES_RAPPORT_PATH, "SUIVI_EVOLUTION PAR_COUCHE.png")
+        if img_archi_globale:
+            st.image(img_archi_globale, caption="Évolution par couche (Audit des données)", use_container_width=True)
 
     # Conclusion
     st.markdown("---")
