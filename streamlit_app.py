@@ -97,7 +97,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ----------------- CHEMINS & FONCTIONS -----------------
-BASE_PATH = r"c:\Users\LOKOUN Kris\Desktop\projects\Prtfolio STREAMLIT"
+BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 PROJET_FINAL_PATH = os.path.join(BASE_PATH, "projet_final")
 IMAGES_RAPPORT_PATH = os.path.join(PROJET_FINAL_PATH, "IMAGES_RAPPORT")
 PBI_PATH = os.path.join(PROJET_FINAL_PATH, "PAGE TABLEAU DE BORD")
