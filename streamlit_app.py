@@ -1,6 +1,6 @@
 import streamlit as st
 import os
-from PIL import Image
+import streamlit.components.v1 as components
 import pandas as pd
 import datetime
 
@@ -104,14 +104,10 @@ PROJET_FINAL_PATH = os.path.join(BASE_PATH, "projet_final")
 IMAGES_RAPPORT_PATH = os.path.join(PROJET_FINAL_PATH, "IMAGES_RAPPORT")
 PBI_PATH = os.path.join(PROJET_FINAL_PATH, "PAGE TABLEAU DE BORD")
 
-@st.cache_data
 def load_image(folder, filename):
     path = os.path.join(folder, filename)
     if os.path.exists(path):
-        try:
-            return Image.open(path)
-        except:
-            return None
+        return path
     return None
 
 # ----------------- CONTENUS MULTILINGUES ET PROFILS (SANS EMOJIS) -----------------
@@ -225,7 +221,7 @@ with st.sidebar:
     with col_pic2:
         img_profile = load_image(BASE_PATH, "Photo de profil.jpeg")
         if img_profile:
-            st.image(img_profile, use_container_width=True, format="JPEG", output_format="JPEG")
+            st.image(img_profile, use_container_width=True)
             
     st.markdown("<h2 style='text-align: center; color: #0A192F; font-weight:700; margin-bottom: 0;'>Kris LOKOUN</h2>", unsafe_allow_html=True)
     
@@ -294,35 +290,50 @@ st.markdown("""
 <div class='text-body' style='margin-bottom:10px; font-weight:700;'>Data Lineage & Macro-Architecture :</div>
 """, unsafe_allow_html=True)
 
-mermaid_code = """
-```mermaid
-flowchart LR
-    subgraph Sources
-    SQL1[(SQL Server\nMagasin)]
-    SQL2[(SQL Server\nOnline)]
-    end
+# Injection HTML garantie pour faire fonctionner MermaidJS sur les vieux serveurs Streamlit Cloud
+mermaid_html = """
+<!DOCTYPE html>
+<html>
+    <head>
+        <script type="module">
+            import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+            mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        </script>
+        <style>
+            body { font-family: 'Roboto', sans-serif; background: transparent; padding: 0; margin: 0; display: flex; justify-content: center; }
+        </style>
+    </head>
+    <body>
+        <div class="mermaid">
+        flowchart LR
+            subgraph Sources
+            SQL1[(SQL Server<br>Magasin)]
+            SQL2[(SQL Server<br>Online)]
+            end
 
-    subgraph ETL
-    DSA[Staging Area\nDSA]
-    ODS[Cleansing\nODS]
-    end
+            subgraph ETL
+            DSA[Staging Area<br>DSA]
+            ODS[Cleansing<br>ODS]
+            end
 
-    subgraph Data_Warehouse
-    DWH[(Star Schema\nDWH)]
-    end
+            subgraph Data_Warehouse
+            DWH[(Star Schema<br>DWH)]
+            end
 
-    subgraph Analytics
-    PBI[Power BI\nDataviz]
-    end
+            subgraph Analytics
+            PBI[Power BI<br>Dataviz]
+            end
 
-    SQL1 --> DSA
-    SQL2 --> DSA
-    DSA --> ODS
-    ODS --> DWH
-    DWH --> PBI
-```
+            SQL1 --> DSA
+            SQL2 --> DSA
+            DSA --> ODS
+            ODS --> DWH
+            DWH --> PBI
+        </div>
+    </body>
+</html>
 """
-st.markdown(mermaid_code)
+components.html(mermaid_html, height=200, scrolling=False)
 
 # Affichage des logos réels web avec Devicon / Uploads Officiels
 st.markdown("""
