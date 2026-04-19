@@ -2,259 +2,320 @@ import streamlit as st
 import os
 from PIL import Image
 
-# Configuration de la page
+# ----------------- CONFIGURATION -----------------
 st.set_page_config(
-    page_title="Portfolio Professionnel | Kris LOKOUN",
+    page_title="Data Portfolio | Kris LOKOUN",
+    page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Style CSS personnalisé pour un rendu professionnel (sans emojis, épuré)
+# ----------------- CSS PROFESSIONNEL -----------------
 st.markdown("""
 <style>
-    /* Masquer le menu Streamlit par défaut et le footer */
+    /* Masquer le menu Streamlit par défaut */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
     
-    /* Typographie et couleurs de base */
-    html, body, [class*="css"]  {
-        font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    /* Typographie */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+    html, body, [class*="css"] {
+        font-family: 'Inter', sans-serif;
     }
     
-    .main-title {
-        font-size: 2.5rem;
-        font-weight: 700;
-        color: #1E3A8A; /* Bleu marine pro */
+    .hero-title {
+        font-size: 2.8rem;
+        font-weight: 800;
+        color: #0F172A;
+        letter-spacing: -0.5px;
         margin-bottom: 0.5rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
     }
     
-    .sub-title {
+    .hero-subtitle {
         font-size: 1.25rem;
-        color: #4B5563; /* Gris ardoise */
+        color: #475569;
+        font-weight: 400;
         margin-bottom: 2rem;
-        border-bottom: 2px solid #E5E7EB;
+        border-bottom: 2px solid #E2E8F0;
         padding-bottom: 1rem;
     }
-    
-    .section-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: #111827;
+
+    .section-header {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #1E293B;
         margin-top: 2rem;
         margin-bottom: 1rem;
-        border-left: 4px solid #1E3A8A;
-        padding-left: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
     
     .text-body {
-        font-size: 1rem;
-        color: #374151;
-        line-height: 1.6;
+        font-size: 1.05rem;
+        color: #334155;
+        line-height: 1.7;
         text-align: justify;
     }
     
-    .tech-tag {
+    .card-tech {
+        background-color: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        border-radius: 8px;
+        padding: 15px;
+        text-align: center;
+        transition: transform 0.2s;
+    }
+    .card-tech:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .badge {
         display: inline-block;
-        background-color: #F3F4F6;
-        color: #1F2937;
+        background: linear-gradient(135deg, #1D4ED8, #3B82F6);
+        color: white;
         padding: 4px 12px;
-        border-radius: 4px;
-        font-size: 0.85rem;
-        font-weight: 500;
-        margin-right: 8px;
-        margin-bottom: 8px;
-        border: 1px solid #D1D5DB;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-right: 6px;
+        margin-bottom: 10px;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Définition des chemins absolus (basés sur votre environnement)
+# ----------------- CHEMINS & FONCTIONS -----------------
 BASE_PATH = r"c:\Users\LOKOUN Kris\Desktop\projects\Prtfolio STREAMLIT"
 PROJET_FINAL_PATH = os.path.join(BASE_PATH, "projet_final")
 IMAGES_RAPPORT_PATH = os.path.join(PROJET_FINAL_PATH, "IMAGES_RAPPORT")
 PBI_PATH = os.path.join(PROJET_FINAL_PATH, "PBI")
 
-# Fonction sécurisée pour charger les images
+@st.cache_data
 def load_image(folder, filename):
     path = os.path.join(folder, filename)
     if os.path.exists(path):
-        return Image.open(path)
+        try:
+            return Image.open(path)
+        except:
+            return None
     return None
 
-# Sidebar pour la navigation des projets
+# ----------------- CONTENUS MULTILINGUES ET PROFILS -----------------
+# Structure : content[lang][expertise]['section']
+content = {
+    'FR': {
+        'Expert': {
+            'role': 'Data & BI Engineer',
+            'intro_title': '🚀 Ingénierie Décisionnelle & Architecture BI Complète',
+            'intro_sub': 'Modélisation en Étoile, ETL 3-Tiers (SSIS) et Dataviz DAX',
+            'context': """Ce projet démontre ma capacité à concevoir une architecture décisionnelle robuste de bout en bout. 
+            L'objectif : unifier des sources hétérogènes (Bases Online et Magasins) pour alimenter un Data Warehouse en étoile. 
+            Le défi technique principal résidait dans le traitement des SCD (Slowly Changing Dimensions) de Type 2 sur les prix et la dénormalisation complexe des hiérarchies musicales (Genres/Artistes/Albums) pour éviter les requêtes Snowflake coûteuses.""",
+            
+            'archi_title': '⚙️ Pipeline ETL Structuré & Modélisation Data Warehouse',
+            'archi_text': """Le flux est orchestré via Microsoft SSIS avec une rigueur absolue :
+            <br>• <b>DSA (Data Staging Area)</b> : Extraction brute "iso-source" via OLE DB, limitant les verrous sur la base de production.
+            <br>• <b>ODS (Operational Data Store)</b> : Nettoyage, typage strict (conversion <code>DT_I4</code> vers <code>NVARCHAR</code>), et résolution des contraintes d'intégrité avec transformation <i>Lookup</i>.
+            <br>• <b>DWH (Data Warehouse)</b> : Insertion/Update massif. Le tracking historique des prix est assuré par un flux SCD Type 2 implémenté nativement, garantissant une absence de distorsion sur les KPIs de Chiffre d'Affaires passés. L'omnicanal (Store + Web) est aggloméré via une opération <i>Union All</i> optimisée dans la table de faits <code>FAIT_VENTES</code>.""",
+            
+            'viz_title': '📈 Intelligence d\'Affaires : DAX & Power BI',
+            'viz_text': """Le reporting n'est pas qu'esthétique, il est analytique. 
+            La restitution s'appuie sur un requêtage DAX poussé pour des mesures de Time Intelligence et d'analyse de cohorte. Les relations Many-to-Many formées par les Playlists ont été gérées via une table Bridge directement dans le modèle vertipaq de Power BI, consolidant 5 axes exploratoires : Synthèse CA, Performances Ventes, Analyse Catalogue, Rétention Client, et Efficacité RH.""",
+            
+            'impact_title': '🎯 Impact Formation & R.O.I Technique',
+            'impact_text': """La prise en charge autonome de cet écosystème valide l'acquisition d'un profil <b>Full-Stack BI Engineer</b>.
+            De la création des scripts DDL SQL Server (`CREATE TABLE`, relations de clés étrangères) jusqu'à la sécurisation RLS (Row-Level Security) pressentie sur Power BI. L'automatisation du reporting via un script Python confirme ma capacité à fusionner l'ingénierie de données classique avec l'écosystème analytique moderne."""
+        },
+        'Business': {
+            'role': 'Analyste BI & Consultant Data',
+            'intro_title': '🚀 Transformer les Données en Décisions Stratégiques',
+            'intro_sub': 'Centralisation des Ventes, Fiabilité des indicateurs et Tableaux de Bord Dynamiques',
+            'context': """Ce projet illustre ma capacité à centraliser les informations d'une entreprise pour aider la direction à prendre de meilleures décisions. L'objectif était de rassembler les ventes issues des magasins physiques et du site e-commerce dans un entrepôt unique, offrant ainsi une "Vue 360°" infaillible de l'activité.""",
+            
+            'archi_title': '⚙️ Fiabilisation et Centralisation des Données',
+            'archi_text': """Avant de pouvoir analyser les données, il fallait les préparer. J'ai construit un "pipeline" automatisé qui :
+            <br>• <b>Extrait</b> les données des logiciels de vente chaque nuit sans les ralentir.
+            <br>• <b>Nettoie</b> les erreurs, uniformise les formats et vérifie l'intégrité (par ex: s'assurer qu'une vente est bien reliée à un client existant).
+            <br>• <b>Sécurise l'historique</b> : J'ai mis en place un système mémorisant l'évolution des prix de vente dans le temps. Ainsi, si une musique coûtait 0.99€ en 2023 et 1.49€ en 2024, le calcul du chiffre d'affaires reste strictement exact pour chaque période.""",
+            
+            'viz_title': '📈 Tableaux de Bord pour la Direction (Power BI)',
+            'viz_text': """Les données nettoyées alimentent un outil de visualisation interactif. 
+            J'ai conçu 5 écrans stratégiques (Synthèse globale, Ventes, Catalogue produit, Fidélité client, Performance des employés). Le Management peut ainsi filtrer dynamiquement les indicateurs pour comprendre d'où vient la croissance, quels sont les produits phares, et comment optimiser les efforts commerciaux.""",
+            
+            'impact_title': '🎯 Valeur Ajoutée & Compétences',
+            'impact_text': """Ce projet m'a permis d'acquérir une double compétence rare :
+            Je comprends le besoin métier d'un manager (suivi du CA, rentabilité), et je possède les compétences de développement nécessaires pour aller extraire et nettoyer cette donnée informatiquement. Je suis capable d'industrialiser ces processus pour garantir que l'entreprise dispose d'indicateurs justes, tous les matins, à 100% automatisés."""
+        }
+    },
+    'EN': {
+        'Expert': {
+            'role': 'Data & BI Engineer',
+            'intro_title': '🚀 End-to-End Decision Support System & BI Architecture',
+            'intro_sub': 'Star Schema Data Warehousing, 3-Tier ETL (SSIS), and Advanced DAX',
+            'context': """This project demonstrates my ability to architect a robust, end-to-end Business Intelligence solution. 
+            The objective: consolidate heterogeneous sources (Online and Retail databases) to feed a pristine Star Schema Data Warehouse. 
+            The primary technical challenge involved managing Type 2 Slowly Changing Dimensions (SCD) for dynamic pricing and heavily denormalizing musical hierarchies (Genres/Artists/Albums) to prevent expensive snowflake queries.""",
+            
+            'archi_title': '⚙️ Structured ETL Pipeline & DWH Modeling',
+            'archi_text': """The data pipeline is fully orchestrated via Microsoft SSIS following strict industry standards:
+            <br>• <b>DSA (Data Staging Area)</b>: Raw, 1:1 extraction using OLE DB, minimizing locks on production servers.
+            <br>• <b>ODS (Operational Data Store)</b>: Cleansing, strict data typing (e.g., handling <code>DT_I4</code> to <code>NVARCHAR</code> conversions), and enforcing referential integrity using <i>Lookup</i> transformations.
+            <br>• <b>DWH (Data Warehouse)</b>: Bulk Insert/Update. Historical pricing is tracked via a natively implemented SCD Type 2 flow, ensuring zero distortion on historical Revenue KPIs. Omnichannel data (Store + Web) is merged using an optimized <i>Union All</i> within the <code>FAIT_VENTES</code> Fact Table.""",
+            
+            'viz_title': '📈 Business Intelligence: DAX & Power BI',
+            'viz_text': """The reporting layer focuses strictly on analytics. 
+            Data delivery relies on advanced DAX querying for Time Intelligence and cohort analysis. The Many-to-Many relationships stemming from Playlists were resolved using a Bridge Table natively inside Power BI's Vertipaq model, driving 5 exploratory axes: Revenue Summary, Sales Performance, Catalog Analytics, Customer Retention, and HR Efficiency.""",
+            
+            'impact_title': '🎯 Training Impact & Technical R.O.I',
+            'impact_text': """Achieving autonomous delivery of this ecosystem validates my profile as a <b>Full-Stack BI Engineer</b>.
+            From crafting SQL Server DDL scripts to potential RLS (Row-Level Security) integration in Power BI. Furthermore, automating the final PDF reporting via a targeted Python script proves my capability to seamlessly bridge traditional data engineering with the modern open-source analytical stack."""
+        },
+        'Business': {
+            'role': 'BI Analyst & Data Consultant',
+            'intro_title': '🚀 Transforming Raw Data into Strategic Decisions',
+            'intro_sub': 'Sales Centralization, Reliable KPIs, and Dynamic Dashboards',
+            'context': """This project showcases my ability to centralize corporate data to empower executive decision-making. The goal was to unify sales records from both physical storefronts and e-commerce platforms into a Single Source of Truth, offering a flawless "360° View" of the business operations.""",
+            
+            'archi_title': '⚙️ Data Centralization & Reliability',
+            'archi_text': """Before data could be analyzed, it had to be prepared. I built an automated "pipeline" that:
+            <br>• <b>Extracts</b> data from sales software overnight without slowing down the actual stores.
+            <br>• <b>Cleanses</b> errors, standardizes formats, and checks structural integrity (e.g., ensuring every sale is linked to a valid customer).
+            <br>• <b>Secures Historical Data</b>: I engineered a system that remembers how retail prices evolve over time. If a song cost $0.99 in 2023 and $1.49 in 2024, the revenue calculations remain perfectly accurate for every respective period.""",
+            
+            'viz_title': '📈 Executive Dashboards (Power BI)',
+            'viz_text': """The cleansed data feeds into an interactive visualization engine. 
+            I designed 5 strategic screens (Global Summary, Sales, Product Catalog, Customer Loyalty, Employee Performance). Leadership can dynamically filter KPIs to understand growth drivers, identify top-selling products, and optimize sales efforts at a glance.""",
+            
+            'impact_title': '🎯 Added Value & Acquired Skills',
+            'impact_text': """This journey allowed me to develop a rare dual-competency:
+            I deeply understand the business needs of a manager (revenue tracking, profitability margins), and I possess the technical development skills to extract and refine that data programmatically. I can industrialize these processes to guarantee the company wakes up to 100% accurate, fully automated KPI reports every single morning."""
+        }
+    }
+}
+
+# ----------------- SIDEBAR INTERACTIVE -----------------
 with st.sidebar:
-    st.markdown("<h2 style='color: #1E3A8A; font-weight: 700;'>Mes Projets</h2>", unsafe_allow_html=True)
-    st.markdown("---")
-    projet_selectionne = st.radio(
-        "Sélectionnez un projet à visualiser :",
-        ["Composant Décisionnel (SAE 4)"]
-        # D'autres projets pourront être ajoutés ici plus tard
-    )
+    # Photo de profil
+    st.markdown("<br>", unsafe_allow_html=True)
+    col_pic1, col_pic2, col_pic3 = st.columns([1, 2, 1])
+    with col_pic2:
+        img_profile = load_image(BASE_PATH, "Photo de profil.jpeg")
+        if img_profile:
+            st.image(img_profile, use_container_width=True, format="JPEG", output_format="JPEG")
+    
+    st.markdown("<h2 style='text-align: center; color: #1E3A8A; font-weight:800; margin-bottom: 0;'>Kris LOKOUN</h2>", unsafe_allow_html=True)
     
     st.markdown("---")
-    st.markdown("<p style='font-size: 0.8rem; color: #6B7280;'>Portfolio Professionnel<br>Développement Data & BI</p>", unsafe_allow_html=True)
+    
+    # Langage Toggle
+    lang = st.radio("🌐 Language / Langue :", ["Français (FR)", "English (EN)"])
+    L = 'FR' if 'FR' in lang else 'EN'
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Expertise Toggle
+    st.markdown(f"**{'🎯 Profil du Visiteur' if L=='FR' else '🎯 Viewer Profile'}**")
+    expertise_label = "Expert Data (Technique)" if L == 'FR' else "Data Expert (Technical)"
+    business_label = "Décisionnel (Métier)" if L == 'FR' else "Executive (Business)"
+    exp_choice = st.radio("Sélection / Selection :", [expertise_label, business_label], label_visibility="collapsed")
+    EXP = 'Expert' if 'Expert' in exp_choice else 'Business'
+    
+    st.markdown(f"<p style='text-align: center; color: #6B7280; font-weight: 600; margin-top:20px;'>{content[L][EXP]['role']}</p>", unsafe_allow_html=True)
+    
+    st.markdown("---")
+    if L == 'FR':
+        st.info("💡 **Astuce** : Changez le mode Profil de Visiteur pour voir le discours s'adapter de la technique pure aux enjeux stratégiques !")
+    else:
+        st.info("💡 **Tip**: Switch the Viewer Profile to see the pitch adapt from pure engineering to executive strategy!")
 
 
-# Contenu principal
-if projet_selectionne == "Composant Décisionnel (SAE 4)":
-    
-    st.markdown("<div class='main-title'>Développement d'une Solution Décisionnelle Complète</div>", unsafe_allow_html=True)
-    st.markdown("<div class='sub-title'>ETL, Data Warehousing & Visualisation Power BI</div>", unsafe_allow_html=True)
-    
-    col1, col2 = st.columns([2, 1])
-    
-    with col1:
-        st.markdown("<div class='section-title'>Résumé Exécutif (FR)</div>", unsafe_allow_html=True)
-        st.markdown("""
-        <div class='text-body'>
-        Ce projet illustre la conception et la mise en œuvre d'une <b>architecture décisionnelle complète (Business Intelligence)</b> utilisant la suite Microsoft SQL Server Integration Services (SSIS). L'objectif est d'intégrer et de consolider des données issues de sources hétérogènes (ventes multicanales : en ligne et en magasin) pour fournir aux décideurs des indicateurs de performance robustes.<br><br>
-        <b>Points clés techniques :</b>
-        <ul>
-            <li><b>Architecture 3-Tiers :</b> Déploiement d'un pipeline étanche : <b>DSA</b> (Data Staging Area) pour l'extraction brute, <b>ODS</b> (Operational Data Store) pour la consolidation et le nettoyage, et <b>DWH</b> (Data Warehouse) pour la modélisation en étoile.</li>
-            <li><b>Modélisation Avancée :</b> Création d'un schéma en étoile pur en évitant les problèmes de flocons. Les dimensions complexes, comme les pistes musicales (albums, artistes, genres) et la résolution des relations Many-to-Many (via une table Bridge pour les Playlists) ont été dénormalisées au sein du DWH.</li>
-            <li><b>Gestion de l'historique (SCD Type 2) :</b> Implémentation du Slowly Changing Dimension de Type 2 via SSIS sur le prix des pistes (DIM_PISTE) pour figer et tracer chaque modification de tarif dans le temps.</li>
-            <li><b>Analyse Omnicanale Omnisciente :</b> Les ventes 'Online' et 'Store' ont été fusionnées au sein d'une table de fait consolidée (FAIT_VENTE) pour un pilotage centralisé sous Power BI.</li>
-        </ul>
-        </div>
-        """, unsafe_allow_html=True)
+# ----------------- CONTENU PRINCIPAL -----------------
+# Hero Section
+st.markdown(f"<div class='hero-title'>{content[L][EXP]['intro_title']}</div>", unsafe_allow_html=True)
+st.markdown(f"<div class='hero-subtitle'>{content[L][EXP]['intro_sub']}</div>", unsafe_allow_html=True)
+
+# Tags technos
+st.markdown("""
+<span class='badge'>Microsoft SQL Server</span>
+<span class='badge'>SSIS / ETL</span>
+<span class='badge'>Power BI</span>
+<span class='badge'>DAX</span>
+<span class='badge'>Python</span>
+""", unsafe_allow_html=True)
+
+st.markdown(f"<div class='text-body' style='margin-top:20px;'>{content[L][EXP]['context']}</div>", unsafe_allow_html=True)
+
+st.markdown("---")
+
+# Section 1: Pipeline
+st.markdown(f"<div class='section-header'>{content[L][EXP]['archi_title']}</div>", unsafe_allow_html=True)
+st.markdown(f"<div class='text-body'>{content[L][EXP]['archi_text']}</div>", unsafe_allow_html=True)
+
+# Images pour Pipeline
+col_img1, col_img2 = st.columns(2)
+with col_img1:
+    img_etl = load_image(IMAGES_RAPPORT_PATH, "RUN_ALL_ETL.png")
+    if img_etl:
+        caption1 = "Orchestration Master Package SSIS" if EXP == 'Expert' else "Pipeline de données automatisé"
+        st.image(img_etl, caption=caption1, use_container_width=True)
         
-        st.markdown("<div class='section-title'>Executive Summary (EN)</div>", unsafe_allow_html=True)
-        st.markdown("""
-        <div class='text-body'>
-        This project demonstrates the end-to-end design and implementation of a <b>Business Intelligence architecture</b> using Microsoft SQL Server Integration Services (SSIS). The goal is to integrate and consolidate data from heterogeneous sources (omnichannel sales: online and in-store) to deliver robust performance metrics to decision-makers.<br><br>
-        <b>Technical Highlights:</b>
-        <ul>
-            <li><b>3-Tier Architecture:</b> Deployment of a strict data pipeline: <b>DSA</b> (Data Staging Area) for raw extraction, <b>ODS</b> (Operational Data Store) for consolidation/cleansing, and <b>DWH</b> (Data Warehouse) for final star-schema modeling.</li>
-            <li><b>Advanced Modeling:</b> Development of a pure star schema to avoid snowflake limitations. Complex structures (e.g., musical tracks, albums, artists, genres) and Many-to-Many relationships (using a Bridge table for Playlists) were heavily denormalized within the DWH.</li>
-            <li><b>Historical Tracking (SCD Type 2):</b> Implementation of Slowly Changing Dimension Type 2 workflows via SSIS on unit prices (DIM_PISTE), tracking pricing evolution dynamically and enabling historically accurate profitability analysis.</li>
-            <li><b>Omnichannel Unification:</b> Both 'Online' and 'Store' sales records were successfully merged inside a consolidated Fact Table (FAIT_VENTE) for holistic, centralized reporting using Power BI.</li>
-        </ul>
-        </div>
-        """, unsafe_allow_html=True)
+    img_archi = load_image(IMAGES_RAPPORT_PATH, "SUIVI_EVOLUTION PAR_COUCHE.png")
+    if img_archi:
+        caption2 = "Audit d'Intégration (DSA -> ODS -> DWH)" if EXP == 'Expert' else "Suivi Qualité et Centralisation"
+        st.image(img_archi, caption=caption2, use_container_width=True)
+
+with col_img2:
+    img_scd = load_image(IMAGES_RAPPORT_PATH, "RESULTAT_SCD2_SSMS_SIMPLE.png")
+    if img_scd:
+        caption3 = "Slowly Changing Dimension Type 2 (Validé via SQL)" if EXP == 'Expert' else "Sécurisation de l'historique des prix"
+        st.image(img_scd, caption=caption3, use_container_width=True)
         
-    with col2:
-        st.markdown("<div class='section-title'>Technologies</div>", unsafe_allow_html=True)
-        st.markdown("""
-        <span class='tech-tag'>SQL Server</span>
-        <span class='tech-tag'>SSIS</span>
-        <span class='tech-tag'>Power BI</span>
-        <span class='tech-tag'>Python</span>
-        <span class='tech-tag'>DAX</span>
-        <span class='tech-tag'>Star Schema</span>
-        <span class='tech-tag'>SCD Type 2</span>
-        """, unsafe_allow_html=True)
-
-    st.markdown("---")
+    # Logos Outils
+    st.markdown("<br><b>Outils / Tools :</b>", unsafe_allow_html=True)
+    col_logo1, col_logo2, col_logo3 = st.columns(3)
     
-    # Section 1: Modélisation et Base de données
-    st.markdown("<div class='section-title'>1. Modélisation Data Warehouse</div>", unsafe_allow_html=True)
-    st.markdown("""
-    <div class='text-body'>
-    Conception d'un modèle en étoile strict. Afin d'éviter les modèles en flocons (Snowflake), la dénormalisation a été privilégiée (par exemple, l'intégration des playlists directement dans la dimension Piste).
-    </div>
-    """, unsafe_allow_html=True)
+    logo_sql = load_image(IMAGES_RAPPORT_PATH, "logo_sql_server.png")
+    if logo_sql: col_logo1.image(logo_sql, width=60)
     
-    img_modele = load_image(IMAGES_RAPPORT_PATH, "MODELE EN ETOILE.png")
-    if img_modele:
-        st.image(img_modele, caption="Modèle en étoile du Data Warehouse", use_container_width=True)
-
-    # Section 2: Processus ETL
-    st.markdown("<div class='section-title'>2. Processus ETL (SSIS) & Historisation</div>", unsafe_allow_html=True)
-    st.markdown("""
-    <div class='text-body'>
-    Développement des flux d'intégration de données avec SQL Server Integration Services. Le flux de données traverse trois couches :
-    <ul>
-        <li><b>DSA (Staging)</b> : Extraction brute des sources de données.</li>
-        <li><b>ODS (Operational Data Store)</b> : Nettoyage, typage et préparation.</li>
-        <li><b>DWH (Data Warehouse)</b> : Chargement final avec gestion des Slowly Changing Dimensions (SCD Type 2) pour tracer l'évolution des prix unitaires.</li>
-    </ul>
-    </div>
-    """, unsafe_allow_html=True)
+    logo_ssis = load_image(IMAGES_RAPPORT_PATH, "logo_ssis.png")
+    if logo_ssis: col_logo2.image(logo_ssis, width=60)
     
-    col_img1, col_img2 = st.columns(2)
-    with col_img1:
-        img_etl = load_image(IMAGES_RAPPORT_PATH, "RUN_ALL_ETL.png")
-        if img_etl:
-            st.image(img_etl, caption="Orchestration via le Master Package SSIS", use_container_width=True)
-            
-        img_ods = load_image(IMAGES_RAPPORT_PATH, "LOAD_ODS_TRACK.png")
-        if img_ods:
-            st.image(img_ods, caption="Data Flow d'alimentation (Derived Column, Lookup)", use_container_width=True)
+    logo_ssms = load_image(IMAGES_RAPPORT_PATH, "logo_ssms.png")
+    if logo_ssms: col_logo3.image(logo_ssms, width=60)
 
-    with col_img2:
-        img_scd = load_image(IMAGES_RAPPORT_PATH, "RESULTAT_SCD2_SSMS_SIMPLE.png")
-        if img_scd:
-            st.image(img_scd, caption="Validation SQL Server du Slowly Changing Dimension", use_container_width=True)
-            
-        img_fait = load_image(IMAGES_RAPPORT_PATH, "DESTINATION_INVOICELINE.png")
-        if img_fait:
-            st.image(img_fait, caption="Consolidation Omnicanale de la Table de Fait", use_container_width=True)
 
-    # Section 3: Visualisation & Reporting
-    st.markdown("<div class='section-title'>3. Analyse Métier (Power BI)</div>", unsafe_allow_html=True)
-    st.markdown("""
-    <div class='text-body'>
-    Restitution des données traduite par un rapport interactif Power BI articulé autour de plusieurs axes analytiques.
-    Utilisation de DAX pour générer des métriques fiables et actionnables pour le management.
-    </div>
-    <br>
-    """, unsafe_allow_html=True)
-    
-    col_pbi1, col_pbi2 = st.columns(2)
-    with col_pbi1:
-        img_synthese = load_image(PBI_PATH, "SYNTHESE.jpg")
-        if img_synthese:
-            st.image(img_synthese, caption="Vue de Synthèse Principale", use_container_width=True)
-            
-        img_client = load_image(PBI_PATH, "Analyse Client.png")
-        if img_client:
-            st.image(img_client, caption="Dashboard Analyse Client", use_container_width=True)
+st.markdown("---")
 
-    with col_pbi2:
-        img_ventes = load_image(PBI_PATH, "VENTES.png")
-        if img_ventes:
-            st.image(img_ventes, caption="Analyse des Ventes & CA", use_container_width=True)
+# Section 2: Dataviz
+st.markdown(f"<div class='section-header'>{content[L][EXP]['viz_title']}</div>", unsafe_allow_html=True)
+st.markdown(f"<div class='text-body'>{content[L][EXP]['viz_text']}</div><br>", unsafe_allow_html=True)
 
-        img_cata = load_image(PBI_PATH, "Catalogue.png")
-        if img_cata:
-            st.image(img_cata, caption="Analyse du Catalogue", use_container_width=True)
-            
-        img_emp = load_image(PBI_PATH, "Employes.png")
-        if img_emp:
-            st.image(img_emp, caption="Dashboard des Employés", use_container_width=True)
+# Affichage optimal des dashboards
+col_dash1, col_dash2 = st.columns(2)
+with col_dash1:
+    img_syn = load_image(PBI_PATH, "SYNTHESE.jpg")
+    if img_syn:
+        st.image(img_syn, caption="Executive Dashboard - Synthèse", use_container_width=True)
+        
+    img_cli = load_image(PBI_PATH, "Analyse Client.png")
+    if img_cli:
+        st.image(img_cli, caption="Insights Client (Fidélisation)", use_container_width=True)
 
-    # Section 4: Impact et Compétences (Formation)
-    st.markdown("<div class='section-title'>4. Impact sur ma Formation & Compétences Acquises</div>", unsafe_allow_html=True)
-    st.markdown("""
-    <div class='text-body'>
-    Ce projet s'est avéré être un tremplin décisif dans ma formation académique et professionnelle, transformant des connaissances théoriques en <b>compétences d'ingénierie concrètes</b>. Il m'a permis d'appréhender la réalité de la gestion de données en entreprise à travers :
-    <ul>
-        <li><b>La vision systémique d'un projet Data :</b> Comprendre comment chaque brique (de la base brute jusqu'au dashboard de la direction) s'interconnecte.</li>
-        <li><b>La résolution de problèmes techniques complexes :</b> Confronter des problématiques réelles comme la gestion des changements de dimension lents (SCD), les erreurs de typage (<code>DT_I4</code> vs <code>NVARCHAR</code>), et la mise en place de structures dénormalisées pour optimiser le temps de requêtage.</li>
-        <li><b>L'autonomie et le sens du détail :</b> Orchestration totale du flux, automatisation, et rédaction de scripts Python pour la génération de rapports finaux (PDF), prouvant ma capacité à livrer un projet technique de bout en bout de manière professionnelle.</li>
-    </ul>
-    Ces acquis valident mon aptitude à intégrer des équipes Data (BI Engineer, Data Engineer) et à participer activement à la valorisation de la donnée en entreprise.
-    </div>
-    <br>
-    """, unsafe_allow_html=True)
+with col_dash2:
+    img_ven = load_image(PBI_PATH, "VENTES.png")
+    if img_ven:
+        st.image(img_ven, caption="Analyse des Ventes", use_container_width=True)
 
-    col_impact1, col_impact2 = st.columns(2)
-    with col_impact1:
-        img_fait_remplie = load_image(IMAGES_RAPPORT_PATH, "AFFICHAGE TABLE DE FAIT REMPLIE.png")
-        if img_fait_remplie:
-            st.image(img_fait_remplie, caption="Aperçu des données consolidées", use_container_width=True)
-    with col_impact2:
-        img_archi_globale = load_image(IMAGES_RAPPORT_PATH, "SUIVI_EVOLUTION PAR_COUCHE.png")
-        if img_archi_globale:
-            st.image(img_archi_globale, caption="Évolution par couche (Audit des données)", use_container_width=True)
+    img_cat = load_image(PBI_PATH, "Catalogue.png")
+    if img_cat:
+        st.image(img_cat, caption="Analyse du Catalogue Produit", use_container_width=True)
 
-    # Conclusion
-    st.markdown("---")
-    st.markdown("""
-    <div class='text-body' style='text-align: center; font-style: italic; color: #6B7280;'>
-    Projet finalisé incluant la génération automatisée d'un rapport de synthèse via scripts Python.
-    </div>
-    """, unsafe_allow_html=True)
+st.markdown("---")
+
+# Section 3: Impact
+st.markdown(f"<div class='section-header'>{content[L][EXP]['impact_title']}</div>", unsafe_allow_html=True)
+st.markdown(f"<div class='text-body'>{content[L][EXP]['impact_text']}</div>", unsafe_allow_html=True)
+
+st.markdown("<br><br><p style='text-align:center; color:#94A3B8; font-size: 0.9rem;'>Portfolio développé avec Streamlit Python.</p>", unsafe_allow_html=True)
