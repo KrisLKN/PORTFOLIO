@@ -120,6 +120,9 @@ content = {
             'viz_text': """La phase de restitution utilise le requêtage DAX pour la génération de mesures de Time Intelligence. 
             Les relations de type Many-to-Many introduites par la structure des Playlists ont été résolues via une Table Bridge au sein du modèle VertiPaq. Le modèle alimente 5 axes d'analyse distincts : Synthèse Financière, Performances Commerciales, Analyse du Catalogue, Suivi Clientèle, et Optimisation des Ressources Humaines.""",
             
+            'qa_title': 'AUDIT ET ASSURANCE QUALITÉ (DATA QUALITY)',
+            'qa_text': """Le pipeline intègre des mécanismes de contrôle stricts. Les rejets d'intégrité lors des transformations <i>Lookup</i> SSIS (ex: clés étrangères orphelines) sont isolés dans des sorties d'erreur (Error Output) pour audit. Les valeurs NULL et les erreurs de casting sont neutralisées en couche ODS via des dérivations conditionnelles et nettoyages en base, garantissant que 100% des lignes insérées en Data Warehouse respectent la conformité métier.""",
+
             'impact_title': 'IMPACT PROFESSIONNEL ET ACQUIS TECHNIQUES',
             'impact_text': """La prise en charge de cet écosystème valide l'intégration de compétences Full-Stack BI Engineer.
             De la création des scripts DDL SQL Server jusqu'à l'implémentation d'un environnement analytique complet et documenté, ce projet démontre une compréhension approfondie de l'ingénierie des données. L'automatisation du reporting via un script Python confirme ma capacité à connecter la Business Intelligence classique aux langages de développement analytique modernes."""
@@ -140,6 +143,9 @@ content = {
             'viz_text': """Les données nettoyées servent de fondation à un outil de visualisation interactif pour les directeurs de service. 
             Cinq écrans stratégiques ont été déployés (Vue d'ensemble, Analyse des Ventes, Rentabilité du Catalogue, Fidélisation Client, Suivi des Ressources). Le Management est apte à filtrer ces rapports dynamiquement pour identifier les leviers de croissance et optimiser la force de vente efficacement.""",
             
+            'qa_title': 'FIABILITÉ RIGOUREUSE ET GESTION DES REJETS',
+            'qa_text': """La différence entre une simple donnée et une aide à la décision, c'est la fiabilité. Le système effectue un contrôle qualité automatisé massif. Si une vente est enregistrée avec des informations manquantes, ou si un prix est corrompu, le système isole automatiquement cette ligne dans une zone de quarantaine pour vérification, empêchant toute pollution des indicateurs financiers. Le Directeur dispose ainsi d'un chiffre d'affaires auditable et certifié.""",
+
             'impact_title': 'VALEUR AJOUTÉE OPÉRATIONNELLE',
             'impact_text': """Cette réalisation valide une double compétence critique :
             Une compréhension claire des enjeux métiers d'un comex (croissance, marges, rentabilité) alliée à une maîtrise technique du traitement la donnée. Je suis capable d'industrialiser et d'automatiser entièrement la production d'indicateurs de performance, afin de fournir quotidiennement une information actualisée, sûre et exploitable à 100%."""
@@ -164,6 +170,9 @@ content = {
             'viz_text': """The analytical layer functions via sophisticated DAX structures built for Time Intelligence reporting. 
             Many-to-Many dependencies inherited from dynamic Playlist assignments were neutralized via a structured Bridge Table injected into the VertiPaq model. This supports 5 interactive dimensions: Revenue Analytics, Sales Pipeline, Catalog Health, Customer Churn, and HR Performance metrics.""",
             
+            'qa_title': 'DATA QA AND ERROR HANDLING',
+            'qa_text': """The pipeline relies on rigorous data quality constraints. Referential integrity rejections encountered during SSIS <i>Lookup</i> components are securely redirected to strict Error Outputs for auditing. NULL handling, duplicate suppression, and data type casting failures are structurally bypassed in the ODS layer via conditional derivatives. This guarantees a 100% integrity rate for records hitting the master Data Warehouse.""",
+
             'impact_title': 'TECHNICAL ROI & ENGINEERING COMPETENCIES',
             'impact_text': """Owning this data lifecycle asserts my proficiency as a Full-Stack BI Engineer.
             Ranging from SQL Server DDL query generation up to BI semantic modeling, this work represents professional-level data engineering logic. The final layer of programmatic PDF reporting via Python validates my readiness to bridge traditional relational environments with modernized coding paradigms."""
@@ -184,6 +193,9 @@ content = {
             'viz_text': """This refined data sustains an intuitive, interactive visualization portal designed for departmental directors. 
             I developed five primary monitors (Global Summary, Revenue Generation, Product Catalog Margins, Customer Loyalty, Workforce Output). The executive staff can actively filter indicators, exposing market drivers and focusing resources precisely where they are needed most.""",
             
+            'qa_title': 'ABSOLUTE RELIABILITY AND QUARANTINE MANAGEMENT',
+            'qa_text': """The difference between raw data and actionable insight is absolute reliability. Before processing, the architectural flow enforces massive automated quality checks. If a transaction surfaces with corrupted identifiers or missing price tags, the system intelligently quarantines the specific record for manual review rather than letting it poison the financial metrics. Leadership operates on entirely audited, flawless revenue figures.""",
+
             'impact_title': 'OPERATIONAL VALUE CREATION',
             'impact_text': """This final product underscores a crucial dual capacity:
             I assimilate complex business imperatives (revenue monitoring, profit safeguarding) and possess the programming insight to process and present that operational reality. I can successfully industrialize backend procedures to guarantee that corporate leaders access perfectly accurate, completely automated daily reports."""
@@ -235,9 +247,44 @@ st.markdown(f"<div class='text-body' style='margin-top:20px;'>{content[L][EXP]['
 # ----------------- SECTION TECHNOLOGIES & PIPELINE -----------------
 st.markdown(f"<div class='section-header'>{content[L][EXP]['archi_title']}</div>", unsafe_allow_html=True)
 
+# Diagramme Architecture Mermaid
+st.markdown("""
+<div class='text-body' style='margin-bottom:10px; font-weight:700;'>Data Lineage & Macro-Architecture :</div>
+""", unsafe_allow_html=True)
+
+mermaid_code = """
+```mermaid
+flowchart LR
+    subgraph Sources
+    SQL1[(SQL Server\nMagasin)]
+    SQL2[(SQL Server\nOnline)]
+    end
+
+    subgraph ETL
+    DSA[Staging Area\nDSA]
+    ODS[Cleansing\nODS]
+    end
+
+    subgraph Data_Warehouse
+    DWH[(Star Schema\nDWH)]
+    end
+
+    subgraph Analytics
+    PBI[Power BI\nDataviz]
+    end
+
+    SQL1 --> DSA
+    SQL2 --> DSA
+    DSA --> ODS
+    ODS --> DWH
+    DWH --> PBI
+```
+"""
+st.markdown(mermaid_code)
+
 # Affichage des logos réels web avec Devicon / Uploads Officiels
 st.markdown("""
-<div class='tech-logo-container'>
+<div class='tech-logo-container' style='margin-top: 20px;'>
     <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/microsoftsqlserver/microsoftsqlserver-plain-wordmark.svg" height="45" title="Microsoft SQL Server"/>
     <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg" height="40" title="Python"/>
     <span style="font-weight:700; color:#0A192F; font-size: 1.2rem; margin-left:10px;">Power BI / SSIS</span>
@@ -245,6 +292,10 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.markdown(f"<div class='text-body'>{content[L][EXP]['archi_text']}</div><br>", unsafe_allow_html=True)
+
+# ----------------- NOUVELLE SOUS-SECTION : QUALITY ASSURANCE -----------------
+st.markdown(f"<p style='font-size: 1.1rem; font-weight: 700; color: #0A192F; border-left: 3px solid #1D4ED8; padding-left: 10px;'>{content[L][EXP]['qa_title']}</p>", unsafe_allow_html=True)
+st.markdown(f"<div class='text-body' style='margin-bottom: 25px;'>{content[L][EXP]['qa_text']}</div>", unsafe_allow_html=True)
 
 col_img1, col_img2 = st.columns(2)
 with col_img1:
