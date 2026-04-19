@@ -1,6 +1,8 @@
 import streamlit as st
 import os
 from PIL import Image
+import pandas as pd
+import datetime
 
 # ----------------- CONFIGURATION -----------------
 st.set_page_config(
@@ -332,6 +334,40 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.markdown(f"<div class='text-body'>{content[L][EXP]['archi_text']}</div><br>", unsafe_allow_html=True)
+
+# ----------------- SIMULATEUR SCD TYPE 2 -----------------
+st.markdown("<br>", unsafe_allow_html=True)
+expander_title = "[INTERACTIVE DEMO] Slowly Changing Dimension (SCD Type 2)" if L=='EN' else "[DÉMO INTERACTIVE] Slowly Changing Dimension (SCD Type 2)"
+with st.expander(expander_title, expanded=True):
+    st.markdown("<p style='font-size: 0.95rem; color: #495057;'>Testez la logique d'historisation implémentée dans le Data Warehouse. Modifiez le prix du produit et observez la clôture / création de ligne dans la base de données.</p>" if L=='FR' else "<p style='font-size: 0.95rem; color: #495057;'>Test the versioning logic implemented in the Data Warehouse. Trigger a price update and observe the row expiration / recreation in the database.</p>", unsafe_allow_html=True)
+    
+    if "scd_data" not in st.session_state:
+        st.session_state.scd_data = pd.DataFrame([
+            {"Track_ID": "TRK-892", "Track_Name": "Business Intelligence Masterclass", "Unit_Price": 1.99, "Valid_From": "2023-01-01", "Valid_To": "9999-12-31", "Is_Active": True}
+        ])
+    
+    col_sim1, col_sim2 = st.columns([1, 2])
+    with col_sim1:
+        st.markdown("<br>", unsafe_allow_html=True)
+        new_price = st.number_input("Nouveau Prix / New Price (€)", min_value=0.50, max_value=50.0, value=2.49, step=0.10)
+        btn_sim = st.button("Mettre à jour la Base DWH" if L=='FR' else "Update DWH Database", use_container_width=True)
+        if btn_sim:
+            try:
+                # Clôture ancienne ligne
+                idx_active = st.session_state.scd_data.index[st.session_state.scd_data["Is_Active"] == True].tolist()[0]
+                st.session_state.scd_data.at[idx_active, "Valid_To"] = datetime.date.today().strftime("%Y-%m-%d")
+                st.session_state.scd_data.at[idx_active, "Is_Active"] = False
+                
+                # Nouvelle ligne
+                new_row = {"Track_ID": "TRK-892", "Track_Name": "Business Intelligence Masterclass", "Unit_Price": new_price, "Valid_From": datetime.date.today().strftime("%Y-%m-%d"), "Valid_To": "9999-12-31", "Is_Active": True}
+                st.session_state.scd_data = pd.concat([st.session_state.scd_data, pd.DataFrame([new_row])], ignore_index=True)
+            except Exception as e:
+                pass
+            
+    with col_sim2:
+        st.dataframe(st.session_state.scd_data, use_container_width=True, hide_index=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
 
 # ----------------- NOUVELLE SOUS-SECTION : QUALITY ASSURANCE -----------------
 st.markdown(f"<p style='font-size: 1.1rem; font-weight: 700; color: #0A192F; border-left: 3px solid #1D4ED8; padding-left: 10px;'>{content[L][EXP]['qa_title']}</p>", unsafe_allow_html=True)
