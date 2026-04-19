@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Music Sales Dashboard - Synthèse</title>
+    <!-- Chargement de Chart.js pour les graphiques -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+
+    <style>
+        /* === VARIABLES CSS (Thème Clair Moderne) === */
+        :root {
+            /* Couleurs de fond principales */
+            --bg-body: #f1f5f9;
+            /* Gris très clair pour le fond global */
+            --bg-card: #ffffff;
+            /* Blanc pur pour les cartes */
+            --bg-sidebar: #1e293b;
+            /* Bleu nuit très foncé pour le menu latéral */
+            --bg-topbar: #ffffff;
+            /* Blanc pour la barre du haut */
+
+            /* Textes */
+            --text-main: #0f172a;
+            /* Presque noir pour le texte principal */
+            --text-muted: #64748b;
+            /* Gris moyen pour le texte secondaire (labels, sous-titres) */
+            --text-sidebar: #cbd5e1;
+            /* Gris clair pour le texte sur fond foncé */
+
+            /* Couleurs d'accentuation (Charte Graphique) */
+            --accent-blue: #2563eb;
+            /* Bleu roi (Couleur principale) */
+            --accent-green: #10b981;
+            /* Vert émeraude (Positif, quantité) */
+            --accent-purple: #8b5cf6;
+            /* Violet (Commandes, diversité) */
+            --accent-amber: #f59e0b;
+            /* Ambre/Orange (Panier moyen, alertes) */
+
+            /* Bordures et Ombres */
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+
+            /* Dimensions */
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --sidebar-width: 240px;
+        }
+
+        /* === RESET & TYPOGRAPHIE === */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            /* Empêche le défilement de toute la page, seul le contenu défilera */
+        }
+
+        /* === MISE EN PAGE GÉNÉRALE === */
+        /* 1. La barre latérale (Sidebar) à gauche */
+        aside.sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--bg-sidebar);
+            display: flex;
+            flex-direction: column;
+            color: white;
+            flex-shrink: 0;
+            /* Empêche la sidebar de rétrécir */
+        }
+
+        .brand {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-menu {
+            padding: 20px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-item {
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            color: var(--text-sidebar);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        .nav-item.active {
+            background-color: var(--accent-blue);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        /* 2. La zone de contenu principal à droite */
+        main.main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* 2a. La barre supérieure (Topbar) */
+        header.topbar {
+            height: 70px;
+            background-color: var(--bg-topbar);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-sm);
+            z-index: 10;
+        }
+
+        .page-title h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .page-title p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* 2b. Les Filtres (Slicers) dans la Topbar */
+        .filters-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .filter-select {
+            padding: 8px 36px 8px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            outline: none;
+            appearance: none;
+            /* Cache la flèche par défaut du navigateur */
+            /* Ajout d'une flèche personnalisée via background SVG */
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .filter-select:hover,
+        .filter-select:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        /* 2c. Le Contenu de la page (Scrollable) */
+        .dashboard-container {
+            padding: 32px;
+            overflow-y: auto;
+            flex: 1;
+            /* La grille principale du contenu */
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* === COMPOSANTS DU DASHBOARD === */
+
+        /* Layout des 4 KPIs en haut */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            /* 4 colonnes égales */
+            gap: 20px;
+        }
+
+        /* Style individuel d'une carte KPI */
+        .kpi-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(0, 0, 0, 0.02);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        /* Ligne de couleur en haut de chaque KPI (pour remplacer le trait tout à gauche que Power BI fait parfois) */
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .kpi-ca::before {
+            background-color: var(--accent-blue);
+        }
+
+        .kpi-qty::before {
+            background-color: var(--accent-green);
+        }
+
+        .kpi-cmd::before {
+            background-color: var(--accent-purple);
+        }
+
+        .kpi-panier::before {
+            background-color: var(--accent-amber);
+        }
+
+        .kpi-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .kpi-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -1px;
+        }
+
+        .kpi-ca .kpi-value {
+            color: var(--accent-blue);
+        }
+
+        .kpi-qty .kpi-value {
+            color: var(--accent-green);
+        }
+
+        .kpi-trend {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 20px;
+            width: fit-content;
+            margin-top: 4px;
+        }
+
+        .trend-up {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--accent-green);
+        }
+
+        /* Layout des Graphiques (Grille CSS) */
+        /* Ligne principale : 2/3 (Courbes) et 1/3 (Donut) */
+        .charts-row-1 {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            /* 2 portions pour le gauche, 1 portion pour le droit */
+            gap: 24px;
+        }
+
+        /* Ligne secondaire : 1/2 (Barres Pays) et 1/2 (Barres Trimestre) */
+        .charts-row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        /* Style conteneur générique pour les graphiques */
+        .chart-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(0, 0, 0, 0.02);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-header {
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .chart-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .chart-body {
+            flex: 1;
+            position: relative;
+            min-height: 250px;
+            /* Hauteur minimale garantie pour que Chart.js s'affiche bien */
+            width: 100%;
+        }
+
+        /* Ajustement très spécifique pour forcer le canvas à remplir son conteneur */
+        .chart-body canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            height: 100% !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ==================== SIDEBAR ==================== -->
+    <aside class="sidebar">
+        <div class="brand">
+            🎵 Music Sales
+        </div>
+        <nav class="nav-menu">
+            <a href="#" class="nav-item active">
+                <span style="font-size: 1.2rem;">📊</span> Synthèse
+            </a>
+            <a href="#" class="nav-item">
+                <span style="font-size: 1.2rem;">📈</span> Ventes
+            </a>
+            <a href="#" class="nav-item">
+                <span style="font-size: 1.2rem;">💽</span> Catalogue
+            </a>
+            <a href="#" class="nav-item">
+                <span style="font-size: 1.2rem;">👥</span> Clients
+            </a>
+            <a href="#" class="nav-item">
+                <span style="font-size: 1.2rem;">🧑‍💼</span> Employés
+            </a>
+        </nav>
+    </aside>
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main class="main-content">
+
+        <!-- TOPBAR (Titre + Filtres/Slicers) -->
+        <header class="topbar">
+            <div class="page-title">
+                <h1>Synthèse Générale</h1>
+                <p>Vue d'ensemble de la performance des ventes</p>
+            </div>
+
+            <div class="filters-group">
+                <!-- Ces select représentent les segments PowerBI en mode "Liste déroulante" -->
+                <select class="filter-select">
+                    <option value="">Année : Toutes</option>
+                    <option value="2025">2025</option>
+                    <option value="2026">2026</option>
+                </select>
+                <select class="filter-select">
+                    <option value="">Canal : Tous</option>
+                    <option value="online">Online</option>
+                    <option value="store">Store</option>
+                </select>
+                <select class="filter-select">
+                    <option value="">Genre : Tous</option>
+                    <option value="rock">Rock</option>
+                    <option value="jazz">Jazz</option>
+                    <option value="metal">Metal</option>
+                </select>
+            </div>
+        </header>
+
+        <!-- DASHBOARD CONTAINER (Scrollable) -->
+        <div class="dashboard-container">
+
+            <!-- ====== LIGNE 1 : Les 4 Cartes KPI ====== -->
+            <section class="kpi-grid">
+
+                <div class="kpi-card kpi-ca">
+                    <div class="kpi-label">Chiffre d'Affaires total</div>
+                    <div class="kpi-value">6 935 €</div>
+                    <div class="kpi-trend trend-up">↑ +12.4% vs N-1</div>
+                </div>
+
+                <div class="kpi-card kpi-qty">
+                    <div class="kpi-label">Quantité Vendue</div>
+                    <div class="kpi-value">2 240</div>
+                    <div class="kpi-trend trend-up">↑ +8.1% pistes</div>
+                </div>
+
+                <div class="kpi-card kpi-cmd">
+                    <div class="kpi-label">Nombre de Commandes</div>
+                    <div class="kpi-value" style="color: var(--text-main);">412</div>
+                    <div class="kpi-trend" style="background: var(--bg-body); color: var(--text-muted);">~ Stable</div>
+                </div>
+
+                <div class="kpi-card kpi-panier">
+                    <div class="kpi-label">Panier Moyen</div>
+                    <div class="kpi-value" style="color: var(--text-main);">16,83 €</div>
+                    <div class="kpi-trend trend-up">↑ +3.9% vs N-1</div>
+                </div>
+
+            </section>
+
+            <!-- ====== LIGNE 2 : Graphiques Principaux (2/3 - 1/3) ====== -->
+            <section class="charts-row-1">
+
+                <!-- Graphique Courbes: CA Mensuel -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h2 class="chart-title">Évolution du CA Mensuel</h2>
+                        <p class="chart-subtitle">Comparaison 2025 (N-1) vs 2026 (N)</p>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="chart-evolution-ca"></canvas>
+                    </div>
+                </div>
+
+                <!-- Graphique Donut: Répartition Canal -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h2 class="chart-title">Répartition par Canal</h2>
+                        <p class="chart-subtitle">Poids relatif du CA</p>
+                    </div>
+                    <!-- On donne une hauteur un peu plus contrainte au donut pour qu'il soit joli au centre -->
+                    <div class="chart-body" style="min-height: 280px; display:flex; justify-content:center;">
+                        <canvas id="chart-canal"
+                            style="width: auto !important; height: 100% !important; max-height: 280px;"></canvas>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- ====== LIGNE 3 : Graphiques Secondaires (1/2 - 1/2) ====== -->
+            <section class="charts-row-2">
+
+                <!-- Graphique Barres Horizontales: Top Pays -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h2 class="chart-title">CA par Pays (Top 8)</h2>
+                        <p class="chart-subtitle">Meilleurs marchés géographiques</p>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="chart-pays"></canvas>
+                    </div>
+                </div>
+
+                <!-- Graphique Colonnes: CA Trimestriel -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h2 class="chart-title">Tendance Trimestrielle</h2>
+                        <p class="chart-subtitle">CA cumulé par trimestre</p>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="chart-trimestre"></canvas>
+                    </div>
+                </div>
+
+            </section>
+
+        </div> <!-- /dashboard-container -->
+    </main>
+
+    <!-- ==================== SCRIPTS CHART.JS ==================== -->
+    <script>
+        // Palette de couleurs partagée avec le CSS
+        const colors = {
+            blue: '#2563eb',
+            blueLight: 'rgba(37, 99, 235, 0.1)',
+            purple: '#8b5cf6',
+            purpleLight: 'rgba(139, 92, 246, 0.1)',
+            green: '#10b981',
+            amber: '#f59e0b',
+            textMuted: '#64748b',
+            gridColor: '#f1f5f9'
+        };
+
+        // Options globales pour harmoniser tous les graphiques (police, suppressions des grilles inutiles)
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.color = colors.textMuted;
+        Chart.defaults.plugins.tooltip.padding = 10;
+        Chart.defaults.plugins.tooltip.cornerRadius = 8;
+        Chart.defaults.plugins.tooltip.titleFont = { size: 13, weight: 'bold' };
+        Chart.defaults.plugins.tooltip.bodyFont = { size: 12 };
+
+        const commonOptionsLineBar = {
+            responsive: true,
+            maintainAspectRatio: false, // Très important pour que les canvas remplissent nos divs flex
+            plugins: {
+                legend: {
+                    position: 'top',
+                    align: 'end',
+                    labels: { boxWidth: 12, usePointStyle: true, padding: 20 }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false, drawBorder: false },
+                    ticks: { font: { size: 11 } }
+                },
+                y: {
+                    border: { display: false },
+                    grid: { color: colors.gridColor, drawTicks: false },
+                    ticks: { font: { size: 11 }, padding: 10 }
+                }
+            }
+        };
+
+        // 1. Graphique: Évolution CA Mensuel (Courbes, comme PowerBI Line Chart)
+        new Chart(document.getElementById('chart-evolution-ca').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
+                datasets: [
+                    {
+                        label: '2026 (N)',
+                        data: [430, 395, 480, 360, 508, 620, 570, 450, 490, 420, 500, 780],
+                        borderColor: colors.blue,
+                        backgroundColor: colors.blueLight,
+                        borderWidth: 2.5,
+                        tension: 0.4, // Rend la courbe lissée (smooth)
+                        fill: true,   // Remplit l'aire sous la courbe (idéal pour le focus)
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: colors.blue,
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    },
+                    {
+                        label: '2025 (N-1)',
+                        data: [320, 290, 360, 270, 410, 520, 480, 360, 390, 310, 400, 680],
+                        borderColor: colors.purple,
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        borderDash: [5, 5], // Ligne pointillée courte pour l'année dernière (bonne pratique BI)
+                        tension: 0.4,
+                        fill: false,
+                        pointRadius: 0, // Cache les points pour ne pas surcharger visuellement
+                        pointHoverRadius: 5
+                    }
+                ]
+            },
+            options: {
+                ...commonOptionsLineBar,
+                interaction: { mode: 'index', intersect: false } // Permet de voir les 2 valeurs au survol
+            }
+        });
+
+        // 2. Graphique: Répartition Canal (Donut)
+        new Chart(document.getElementById('chart-canal').getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Online', 'Store'],
+                datasets: [{
+                    data: [58, 42],
+                    backgroundColor: [colors.blue, colors.purple],
+                    borderWidth: 3,
+                    borderColor: '#ffffff',
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '72%', // Épaisseur de l'anneau fin, très moderne
+                plugins: {
+                    legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
+                }
+            }
+        });
+
+        // 3. Graphique: CA par Pays (Barres Horizontales)
+        new Chart(document.getElementById('chart-pays').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ['USA', 'Allemagne', 'France', 'UK', 'Brésil', 'Canada', 'Espagne', 'Italie'],
+                datasets: [{
+                    label: 'CA (€)',
+                    // Données triées de manière décroissante
+                    data: [1240, 980, 870, 650, 490, 440, 380, 330],
+                    // Dégradé simulé en donnant une couleur légèrement différente ou en utilisant la opacité
+                    backgroundColor: [
+                        '#1e40af', '#1d4ed8', '#2563eb', '#3b82f6',
+                        '#60a5fa', '#93c5fd', '#bfdbfe', '#e0e7ff'
+                    ],
+                    borderRadius: 4, // Coins arrondis à l'extrémité des barres
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                ...commonOptionsLineBar,
+                indexAxis: 'y', // Transforme le Bar Chart vertical en horizontal !
+                plugins: {
+                    legend: { display: false } // Pour les bar charts simples, la légende est souvent redondante
+                },
+                scales: {
+                    x: {
+                        grid: { color: colors.gridColor, drawTicks: false },
+                        ticks: { font: { size: 11 }, padding: 5, callback: (val) => val + '€' } // Ajoute le sigle €
+                    },
+                    y: {
+                        grid: { display: false, drawBorder: false },
+                        ticks: { font: { size: 12, weight: '500' } }
+                    }
+                }
+            }
+        });
+
+        // 4. Graphique: Tendance Trimestrielle (Colonnes Verticales Clustered)
+        new Chart(document.getElementById('chart-trimestre').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ['T1 25', 'T2 25', 'T3 25', 'T4 25', 'T1 26'],
+                datasets: [{
+                    label: 'Chiffre d\'Affaires (€)',
+                    data: [970, 1200, 1230, 1390, 1450],
+                    // On colore différemment l'année en cours N par rapport à N-1
+                    backgroundColor: [colors.purpleLight, colors.purpleLight, colors.purpleLight, colors.purpleLight, colors.blue],
+                    borderColor: [colors.purple, colors.purple, colors.purple, colors.purple, colors.blue],
+                    borderWidth: 1,
+                    borderRadius: 6,
+                    barPercentage: 0.6 // Largeur des colonnes
+                }]
+            },
+            options: {
+                ...commonOptionsLineBar,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { size: 11, weight: '500' } }
+                    },
+                    y: {
+                        grid: { color: colors.gridColor, drawTicks: false },
+                        ticks: { font: { size: 11 }, padding: 10 }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Music Sales — Analyse des Ventes</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        /* === CHARTE IDENTIQUE À ONGLET 1 === */
+        :root {
+            --bg-page: #F8FAFC;
+            --bg-cards: #FFFFFF;
+            --header-bg: #0F4C81;
+            --border-color: #E2E8F0;
+            --text-dark: #1E293B;
+            --text-regular: #475569;
+            --text-light: #94A3B8;
+            --slicer-bg: #E2E8F0;
+            /* Palette Données */
+            --blue: #2563EB;
+            --dark-blue: #1E40AF;
+            --light-blue: #60A5FA;
+            --teal: #0D9488;
+            --teal-faded: rgba(13, 148, 136, 0.1);
+            --amber: #D97706;
+            --amber-faded: rgba(217, 119, 6, 0.1);
+            --green: #059669;
+            --red: #DC2626;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Verdana, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-regular);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Top Banner */
+        header.top-banner {
+            background-color: var(--header-bg);
+            color: white;
+            padding: 14px 24px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+            position: relative;
+        }
+
+        /* Badge "Onglet actif" dans le banner */
+        .banner-badge {
+            position: absolute;
+            right: 24px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+
+        /* Liens vers les autres onglets */
+        .tabs-bar {
+            background-color: var(--dark-blue);
+            display: flex;
+            gap: 2px;
+            padding: 0 20px;
+            flex-shrink: 0;
+        }
+
+        .tab-link {
+            color: rgba(255, 255, 255, 0.65);
+            text-decoration: none;
+            padding: 10px 18px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab-link.active {
+            color: white;
+            border-bottom-color: #60A5FA;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .tab-link:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Workspace */
+        .workspace {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Sidebar Slicers */
+        aside.slicer-pane {
+            width: 200px;
+            background-color: var(--bg-cards);
+            border-right: 1px solid var(--border-color);
+            padding: 20px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            flex-shrink: 0;
+            overflow-y: auto;
+        }
+
+        .slicer-block {
+            background: var(--slicer-bg);
+            border-radius: 4px;
+            padding: 10px;
+        }
+
+        .slicer-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 7px;
+            letter-spacing: 0.5px;
+        }
+
+        .slicer-dropdown {
+            width: 100%;
+            padding: 5px 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 2px;
+            background: var(--bg-cards);
+            font-size: 0.83rem;
+            color: var(--text-regular);
+        }
+
+        /* Zone principale */
+        main.main-canvas {
+            flex: 1;
+            padding: 18px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* KPIs */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+        }
+
+        .kpi-card {
+            background: var(--bg-cards);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 16px 18px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+
+        .kpi1::before {
+            background: var(--blue);
+        }
+
+        .kpi2::before {
+            background: rgb(100, 75, 214);
+        }
+
+        .kpi3::before {
+            background: var(--teal);
+        }
+
+        .kpi4::before {
+            background: var(--amber);
+        }
+
+        .kpi-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: var(--text-light);
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .kpi1 .kpi-value {
+            color: var(--blue);
+        }
+
+        .kpi2 .kpi-value {
+            color: rgb(100, 75, 214);
+        }
+
+        .kpi-trend {
+            font-size: 0.78rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .trend-up {
+            color: var(--green);
+        }
+
+        .trend-down {
+            color: var(--red);
+        }
+
+        .trend-eq {
+            color: var(--text-light);
+        }
+
+        /* Graphiques */
+        .charts-row {
+            display: grid;
+            gap: 16px;
+        }
+
+        .r2 {
+            grid-template-columns: 1fr 1fr;
+            min-height: 280px;
+        }
+
+        .r23 {
+            grid-template-columns: 2fr 1fr;
+            min-height: 290px;
+        }
+
+        .r32 {
+            grid-template-columns: 1fr 1fr;
+            min-height: 300px;
+        }
+
+        .chart-box {
+            background: var(--bg-cards);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-header {
+            margin-bottom: 12px;
+        }
+
+        .c-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .c-sub {
+            font-size: 0.78rem;
+            color: var(--text-light);
+            margin-top: 2px;
+        }
+
+        .canvas-container {
+            flex: 1;
+            position: relative;
+        }
+
+        /* Bloc SCD2 (visuel explicatif) */
+        .scd2-box {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .scd2-card {
+            flex: 1;
+            border-radius: 6px;
+            padding: 14px;
+            text-align: center;
+        }
+
+        .scd2-active {
+            background: rgba(5, 150, 105, 0.08);
+            border: 1px solid rgba(5, 150, 105, 0.3);
+        }
+
+        .scd2-archived {
+            background: rgba(220, 38, 38, 0.07);
+            border: 1px solid rgba(220, 38, 38, 0.2);
+            opacity: 0.8;
+        }
+
+        .scd2-value {
+            font-size: 1.7rem;
+            font-weight: 700;
+            margin: 6px 0;
+        }
+
+        .scd2-lbl {
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-light);
+        }
+
+        .scd2-date {
+            font-size: 0.7rem;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+
+        .scd2-arrow {
+            display: flex;
+            align-items: center;
+            color: var(--text-light);
+            font-size: 1.4rem;
+            padding: 0 4px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Banner -->
+    <header class="top-banner">
+        MUSIC SALES — ANALYSE DES VENTES
+        <span class="banner-badge">Onglet 2 / 5</span>
+    </header>
+
+    <!-- Tabs navigation -->
+    <div class="tabs-bar">
+        <a href="dashboard_mockup.html" class="tab-link">Synthèse</a>
+        <a href="#" class="tab-link active">Ventes</a>
+        <a href="tab3_catalogue.html" class="tab-link">Catalogue</a>
+        <a href="tab4_clients.html" class="tab-link">Clients</a>
+        <a href="tab5_employes.html" class="tab-link">Employés</a>
+    </div>
+
+    <div class="workspace">
+
+        <!-- Slicers -->
+        <aside class="slicer-pane">
+            <div class="slicer-block">
+                <div class="slicer-title">CANAL DE VENTE</div>
+                <select class="slicer-dropdown">
+                    <option>Tout</option>
+                    <option>Online</option>
+                    <option>Magasin</option>
+                </select>
+            </div>
+            <div class="slicer-block">
+                <div class="slicer-title">GENRE MUSICAL</div>
+                <select class="slicer-dropdown">
+                    <option>Tout</option>
+                    <option>Rock</option>
+                    <option>Jazz</option>
+                    <option>Metal</option>
+                </select>
+            </div>
+            <div class="slicer-block">
+                <div class="slicer-title">TYPE DE MÉDIA</div>
+                <select class="slicer-dropdown">
+                    <option>Tout</option>
+                </select>
+            </div>
+            <div style="height:10px;"></div>
+            <div class="slicer-block">
+                <div class="slicer-title">JOUR</div>
+                <select class="slicer-dropdown">
+                    <option>Tout</option>
+                </select>
+            </div>
+            <div class="slicer-block">
+                <div class="slicer-title">MOIS</div>
+                <select class="slicer-dropdown">
+                    <option>Tout</option>
+                </select>
+            </div>
+            <div class="slicer-block">
+                <div class="slicer-title">ANNÉE</div>
+                <select class="slicer-dropdown">
+                    <option>Tout</option>
+                    <option>2025</option>
+                    <option>2026</option>
+                </select>
+            </div>
+        </aside>
+
+        <!-- Contenu -->
+        <main class="main-canvas">
+
+            <!-- LIGNE KPI -->
+            <div class="kpi-row">
+                <div class="kpi-card kpi1">
+                    <div class="kpi-label">CA Année en cours</div>
+                    <div class="kpi-value">3 900 €</div>
+                    <div class="kpi-trend trend-up">▲ +28.5% vs 2025</div>
+                </div>
+                <div class="kpi-card kpi2">
+                    <div class="kpi-label">CA N-1 (2025)</div>
+                    <div class="kpi-value" style="color: rgb(100,75,214);">3 035 €</div>
+                    <div class="kpi-trend trend-eq">— Référence</div>
+                </div>
+                <div class="kpi-card kpi3">
+                    <div class="kpi-label">CA YTD (Jan-Mar)</div>
+                    <div class="kpi-value" style="color: var(--teal);">970 €</div>
+                    <div class="kpi-trend trend-up">▲ En progression</div>
+                </div>
+                <div class="kpi-card kpi4">
+                    <div class="kpi-label">Prix Unitaire Moyen</div>
+                    <div class="kpi-value" style="color: var(--amber);">0,74 €</div>
+                    <div class="kpi-trend trend-down">▼ Impact SCD2</div>
+                </div>
+            </div>
+
+            <!-- LIGNE 2 : Comparaison N vs N-1 + Répartition Trimestrielle -->
+            <div class="charts-row r23">
+                <!-- Barres groupées N vs N-1 -->
+                <div class="chart-box">
+                    <div class="chart-header">
+                        <div class="c-title">Comparaison CA Mensuel — 2025 vs 2026</div>
+                        <div class="c-sub">Barres groupées — mesures CA et CA_N_Moins_1</div>
+                    </div>
+                    <div class="canvas-container">
+                        <canvas id="c-grouped"></canvas>
+                    </div>
+                </div>
+                <!-- Pie Trimestriel -->
+                <div class="chart-box">
+                    <div class="chart-header">
+                        <div class="c-title">Répartition par Trimestre</div>
+                        <div class="c-sub">Part du CA total 2026</div>
+                    </div>
+                    <div class="canvas-container" style="display:flex; justify-content:center;">
+                        <canvas id="c-pie-trim" style="max-height:220px; width:auto !important;"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LIGNE 3 : Saisonnalité + SCD2 -->
+            <div class="charts-row r2">
+                <!-- Barres jour semaine -->
+                <div class="chart-box">
+                    <div class="chart-header">
+                        <div class="c-title">Volume de Ventes par Jour de la Semaine</div>
+                        <div class="c-sub">Quantite_Vendue — DIM_DATE[JourSemaine]</div>
+                    </div>
+                    <div class="canvas-container">
+                        <canvas id="c-jours"></canvas>
+                    </div>
+                </div>
+                <!-- SCD2 Proof -->
+                <div class="chart-box">
+                    <div class="chart-header">
+                        <div class="c-title">📌 Impact SCD2 — Évolution du Prix Unitaire</div>
+                        <div class="c-sub">Graphique en escalier — changement de prix historique</div>
+                    </div>
+                    <!-- Bloc SCD2 visuel -->
+                    <div class="scd2-box">
+                        <div class="scd2-card scd2-archived">
+                            <div class="scd2-lbl">🗂 Version Archivée (ACTIF=0)</div>
+                            <div class="scd2-value" style="color:var(--red);">0,99 €</div>
+                            <div class="scd2-date">DATE_DÉBUT : 01/01/2025</div>
+                            <div class="scd2-date">DATE_FIN : 04/03/2026</div>
+                        </div>
+                        <div class="scd2-arrow">→</div>
+                        <div class="scd2-card scd2-active">
+                            <div class="scd2-lbl">✅ Version Active (ACTIF=1)</div>
+                            <div class="scd2-value" style="color:var(--green);">0,49 €</div>
+                            <div class="scd2-date">DATE_DÉBUT : 04/03/2026</div>
+                            <div class="scd2-date">DATE_FIN : NULL</div>
+                        </div>
+                    </div>
+                    <!-- Graphique en escalier -->
+                    <div class="canvas-container" style="flex: 1;">
+                        <canvas id="c-scd2"></canvas>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script>
+        Chart.defaults.font.family = "'Segoe UI', Tahoma, sans-serif";
+        Chart.defaults.color = '#475569';
+
+        const grid = { color: '#F1F5F9', drawBorder: false, drawTicks: false };
+
+        // 1. Barres Groupées N vs N-1
+        new Chart(document.getElementById('c-grouped').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
+                datasets: [
+                    { label: '2026 (N)', data: [430, 395, 480, 360, 508, 620, 570, 450, 490, 420, 500, 780], backgroundColor: 'rgba(37,99,235,0.75)', borderRadius: 2 },
+                    { label: '2025 (N-1)', data: [320, 290, 360, 270, 410, 520, 480, 360, 390, 310, 400, 680], backgroundColor: 'rgba(100,75,214,0.5)', borderRadius: 2 }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'top', align: 'end', labels: { usePointStyle: true, boxWidth: 8 } } },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { grid, border: { display: false } }
+                }
+            }
+        });
+
+        // 2. Pie Trimestriel
+        new Chart(document.getElementById('c-pie-trim').getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: ['T1', 'T2', 'T3', 'T4'],
+                datasets: [{
+                    data: [970, 1200, 1230, 1390],
+                    backgroundColor: ['#1E3A8A', '#1D4ED8', '#3B82F6', '#60A5FA'],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 9 } } }
+            }
+        });
+
+        // 3. Barres Jour de Semaine
+        new Chart(document.getElementById('c-jours').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+                datasets: [{
+                    label: 'Nb Ventes',
+                    data: [180, 210, 195, 220, 315, 285, 140],
+                    backgroundColor: ['#1E3A8A', '#1E40AF', '#1D4ED8', '#2563EB', '#3B82F6', '#60A5FA', '#93C5FD'],
+                    borderRadius: 3
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { grid, border: { display: false } }
+                }
+            }
+        });
+
+        // 4. Graphique SCD2 en ESCALIER (Stepped Line) — Proof du SCD2
+        new Chart(document.getElementById('c-scd2').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: ['Jan 25', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc', 'Jan 26', 'Fév', 'Mar 26'],
+                datasets: [{
+                    label: 'Prix Unitaire Moyen (€)',
+                    data: [0.99, 0.99, 0.99, 0.99, 0.99, 0.99, 0.99, 0.99, 0.99, 0.99, 0.99, 0.99, 0.99, 0.99, 0.49],
+                    borderColor: '#D97706',
+                    backgroundColor: 'rgba(217,119,6,0.08)',
+                    borderWidth: 2.5,
+                    stepped: true, // L'ESCALIER ! Montre exactement quand le prix a changé
+                    fill: true,
+                    pointRadius: (ctx) => ctx.dataIndex === 14 ? 7 : 0, // Point visible uniquement sur le changement
+                    pointBackgroundColor: '#DC2626',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: { label: ctx => ' Prix : ' + ctx.raw + ' €' }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false }, ticks: { font: { size: 9 } } },
+                    y: { grid, border: { display: false }, min: 0.3, max: 1.2, ticks: { callback: v => v.toFixed(2) + ' €' } }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

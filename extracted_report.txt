@@ -1,0 +1,74 @@
+DATE DE DÉPÔT : 17/03/2026
+
+
+
+Université de Lille – BUT Informatique – BUT 2
+--------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+Par
+Kris LOKOUN et Abel THYS
+
+
+
+Sous la direction de
+M. Yannick Le Véler
+
+Table des matières
+I. Introduction ............................................................................................................... 2
+II. Méthodologie ............................................................................................................ 4
+   1. Architecture technique ........................................................................................ 4
+   2. Modélisation et Dénormalisation ........................................................................ 5
+III. Détail du projet ....................................................................................................... 6
+   1. Mise en oeuvre des flux ETL ............................................................................... 7
+   2. Historisation SCD Type 2 ................................................................................. 8
+   3. Restitution Analytics ............. .......................................................................... 10
+IV. Conclusion ............................................................................................................. 12
+V. Bilan personnel ....................................................................................................... 13
+
+I. Introduction
+Ce projet s'inscrit dans la mise en œuvre d'une architecture décisionnelle robuste utilisant la suite Microsoft SQL Server Integration Services (SSIS). L'objectif principal est l'intégration et la consolidation de données provenant de sources hétérogènes (vente en ligne et magasins physiques) afin de fournir des indicateurs de performance fiables au management. Dans un contexte de volume de données croissant, la capacité à transformer des données brutes en informations stratégiques est devenue un pilier fondamental de la gestion d'entreprise.
+L'enjeu technique majeur a été la conception de flux ETL (Extract, Transform, Load) capables de gérer des typologies de données variées, d'assurer l'historisation des changements critiques (comme les prix unitaires) et de dénormaliser des structures complexes pour optimiser le reporting analytique. Ce document détaille les étapes méthodologiques, les choix d'architecture et les solutions techniques retenues pour répondre à ces exigences.
+
+II. Méthodologie
+1. Architecture technique en trois tiers
+L'architecture de la solution repose sur un pipeline de données structuré en trois niveaux étanches, garantissant la traçabilité, l'intégrité et la résilience des transformations :
+
+Data Staging Area (DSA) : Cette couche sert de zone d'atterrissage pour les données extraites directement des sources SQL Server. Elle permet d'isoler le système décisionnel des bases de production, limitant ainsi l'impact sur les performances opérationnelles.
+Operational Data Store (ODS) : Zone de préparation dynamique où s'opèrent les nettoyages, les transcodages et la gestion de la temporalité. C'est ici que sont calculés les différentiels de données (nouveautés vs modifications).
+Data Warehouse (DWH) : L'aboutissement du pipeline, organisé selon un schéma en étoile optimisé pour le reporting. Le DWH contient l'historique complet et les dimensions dénormalisées.
+
+Figure 1 : Modélisation en étoile cible du Data Warehouse
+2. Modélisation et Dénormalisation stratégique
+Le choix du schéma en étoile a été guidé par la nécessité de performance. Pour la dimension des pistes musicales (DIM_PISTE), nous avons implémenté une technique de dénormalisation avancée. Les informations de genre, d'album et d'artiste ont été fusionnées directement dans la table de dimension. De plus, pour gérer la relation many-to-many avec les Playlists, nous avons mis en place une Table de Bridge (BRIDGE_PISTE_PLAYLIST) permettant une navigation multidimensionnelle fluide.
+
+III. Détail du projet
+1. Orchestration globale via les Master Packages
+Le projet SSIS a été structuré pour une maintenabilité maximale. Un package maître 'RUN_ALL_ETL.dtsx' orchestre l'ensemble du flux. Cette approche permet une exécution en bloc tout en offrant la possibilité de relancer granularité par couche (DSA, ODS ou DWH) en cas d'incident spécifique.
+
+Figure 2 : Orchestration globale des packages SSIS
+2. Mise en œuvre des flux ETL complexes
+L'alimentation de l'ODS et du DWH utilise des composants SSIS avancés pour garantir la qualité de la donnée. Nous avons exploité le composant 'Lookup' pour assurer l'intégrité référentielle en temps réel et le 'Derived Column' pour enrichir les données avec des timestamps de chargement (LoadDate).
+
+Figure 3 : Exemple de Data Flow d'alimentation de la table ODS_TRACK
+3. Historisation avancée : SCD Type 2
+L'une des contraintes métier les plus critiques était la conservation de l'historique des prix unitaires. Pour ce faire, nous avons implémenté la méthode Slowly Changing Dimension de Type 2 sur la dimension DIM_PISTE.
+Chaque changement de prix déclenche la clôture de l'enregistrement actuel (Date_Fin = Now, Actif = 0) et l'insertion d'une nouvelle version (Date_Debut = Now, Date_Fin = 2400, Actif = 1). Cette technique permet au management de réaliser des analyses de rentabilité passées précises, basées sur les prix réels au moment de la transaction.
+
+Figure 4 : Vérification de l'historisation SCD2 en base de données SQL Server
+4. Fusion Omnicanal (Online + Store)
+L'intégration finale des ventes fusionne les données de la base Online et de la base Store. Le flux de la table FAIT_VENTE opère une consolidation verticale (Union All), permettant ainsi un pilotage unifié du chiffre d'affaires global de l'entreprise.
+
+Figure 5 : Flux de fusion omnicanal de la table de fait
+
+IV. Conclusion et Perspectives
+Ce projet de solution décisionnelle sous SSIS a permis de transformer des bases opérationnelles fragmentées en un entrepôt de données structuré et exploitable. L'implémentation réussie de l'historisation SCD2 et de la dénormalisation des playlists constitue une base solide pour des analyses BI prospectives.
+Les perspectives d'évolution incluent l'automatisation totale via SQL Server Agent et l'extension du modèle à d'autres domaines d'analyse comme la satisfaction client.

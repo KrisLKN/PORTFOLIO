@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Music Sales Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #F8FAFC;
+      --card: #FFFFFF;
+      --hdr: #0F4C81;
+      --blue: #2563EB;
+      --blue-dk: #1E40AF;
+      --blue-lt: #60A5FA;
+      --teal: #0D9488;
+      --teal-f: rgba(13, 148, 136, .10);
+      --border: #E2E8F0;
+      --txt: #1E293B;
+      --sub: #475569;
+      --muted: #94A3B8;
+      --pal1: #1E3A8A;
+      --pal2: #1E40AF;
+      --pal3: #2563EB;
+      --pal4: #3B82F6;
+      --pal5: #60A5FA;
+      --green: #059669;
+      --amber: #D97706;
+      --red: #DC2626;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--sub);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--hdr);
+      color: #fff;
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, .15);
+    }
+
+    header .title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+    }
+
+    header .hdr-filters {
+      display: flex;
+      gap: 8px;
+    }
+
+    .hdr-chip {
+      background: rgba(255, 255, 255, .15);
+      border: 1px solid rgba(255, 255, 255, .3);
+      border-radius: 4px;
+      padding: 4px 10px;
+      font-size: .75rem;
+      color: #fff;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .hdr-chip select {
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: .75rem;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* ── TABS ── */
+    nav.tabs {
+      background: var(--hdr);
+      display: flex;
+      gap: 2px;
+      padding: 0 24px;
+      flex-shrink: 0;
+    }
+
+    nav.tabs .tab {
+      padding: 8px 18px;
+      font-size: .82rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, .65);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all .2s;
+      user-select: none;
+    }
+
+    nav.tabs .tab:hover {
+      color: #fff;
+    }
+
+    nav.tabs .tab.active {
+      color: #fff;
+      border-bottom-color: #60A5FA;
+    }
+
+    /* ── WORKSPACE ── */
+    .workspace {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── SLICER PANE ── */
+    aside {
+      width: 200px;
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex-shrink: 0;
+      overflow-y: auto;
+    }
+
+    .sl-blk {
+      background: #F1F5F9;
+      border-radius: 4px;
+      padding: 8px;
+    }
+
+    .sl-title {
+      font-size: .7rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--txt);
+      margin-bottom: 6px;
+      letter-spacing: .5px;
+    }
+
+    .sl-sel {
+      width: 100%;
+      padding: 5px 7px;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      background: #fff;
+      color: var(--sub);
+      font-size: .8rem;
+      outline: none;
+    }
+
+    /* ── MAIN CANVAS ── */
+    main {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* ── KPI ROW ── */
+    .kpi-row {
+      display: grid;
+      gap: 12px;
+      background: var(--card);
+      padding: 12px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, .05);
+    }
+
+    .kpi-row-4 {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .kpi-row-5 {
+      grid-template-columns: repeat(5, 1fr);
+    }
+
+    .kpi {
+      text-align: center;
+      border-right: 1px solid var(--border);
+    }
+
+    .kpi:last-child {
+      border-right: none;
+    }
+
+    .kpi-val {
+      font-size: 1.9rem;
+      font-weight: 700;
+      line-height: 1.1;
+      color: var(--blue);
+    }
+
+    .kpi-val.green {
+      color: var(--green);
+    }
+
+    .kpi-val.amber {
+      color: var(--amber);
+    }
+
+    .kpi-val.red {
+      color: var(--red);
+    }
+
+    .kpi-lbl {
+      font-size: .8rem;
+      color: var(--sub);
+      margin-top: 3px;
+      font-weight: 600;
+    }
+
+    .kpi-delta {
+      font-size: .72rem;
+      margin-top: 2px;
+    }
+
+    .kpi-delta.up {
+      color: var(--green);
+    }
+
+    .kpi-delta.down {
+      color: var(--red);
+    }
+
+    /* ── CHART GRIDS ── */
+    .row-2-1 {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 14px;
+      min-height: 250px;
+    }
+
+    .row-1-1 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      min-height: 260px;
+    }
+
+    .row-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+      min-height: 240px;
+    }
+
+    .row-1-2 {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 14px;
+      min-height: 260px;
+    }
+
+    .full {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      min-height: 250px;
+    }
+
+    /* ── CHART BOX ── */
+    .box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, .05);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .box-hdr {
+      margin-bottom: 10px;
+    }
+
+    .box-title {
+      font-size: .95rem;
+      color: var(--txt);
+      font-weight: 700;
+    }
+
+    .box-sub {
+      font-size: .75rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .canvas-wrap {
+      flex: 1;
+      position: relative;
+      width: 100%;
+    }
+
+    /* ── TABLE ── */
+    .tbl-wrap {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .8rem;
+    }
+
+    thead th {
+      background: var(--hdr);
+      color: #fff;
+      padding: 7px 10px;
+      text-align: left;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #F1F5F9;
+    }
+
+    tbody td {
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    tbody td.num {
+      text-align: right;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: .7rem;
+      font-weight: 700;
+    }
+
+    .badge-g {
+      background: #D1FAE5;
+      color: #065F46;
+    }
+
+    .badge-r {
+      background: #FEE2E2;
+      color: #991B1B;
+    }
+
+    .badge-b {
+      background: #DBEAFE;
+      color: #1E40AF;
+    }
+
+    /* ── PAGE VISIBILITY ── */
+    .page {
+      display: none;
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .page.active {
+      display: flex;
+    }
+
+    /* ── PROGRESS BAR ── */
+    .progress-bar {
+      background: #E2E8F0;
+      border-radius: 4px;
+      height: 8px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: var(--blue);
+    }
+
+    /* ── GAUGE ── */
+    .gauge-ring {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #fff;
+      margin: 0 auto 6px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="title">🎵 MUSIC SALES</div>
+    <div class="hdr-filters">
+      <div class="hdr-chip">JOUR <select>
+          <option>Tout</option>
+        </select></div>
+      <div class="hdr-chip">MOIS <select>
+          <option>Tout</option>
+        </select></div>
+      <div class="hdr-chip">ANNÉE <select>
+          <option>Tout</option>
+        </select></div>
+    </div>
+  </header>
+
+  <!-- TABS -->
+  <nav class="tabs">
+    <div class="tab active" onclick="switchTab(0)">Synthèse</div>
+    <div class="tab" onclick="switchTab(1)">Analyse des ventes</div>
+    <div class="tab" onclick="switchTab(2)">Analyse du catalogue</div>
+    <div class="tab" onclick="switchTab(3)">Analyse des clients</div>
+    <div class="tab" onclick="switchTab(4)">Analyse des employés</div>
+  </nav>
+
+  <div class="workspace">
+
+    <!-- SLICER -->
+    <aside>
+      <div class="sl-blk">
+        <div class="sl-title">Canal de vente</div><select class="sl-sel">
+          <option>Tout</option>
+          <option>Online</option>
+          <option>Magasin</option>
+        </select>
+      </div>
+      <div class="sl-blk">
+        <div class="sl-title">Genre musical</div><select class="sl-sel">
+          <option>Tout</option>
+          <option>Rock</option>
+          <option>Jazz</option>
+          <option>Pop</option>
+        </select>
+      </div>
+      <div class="sl-blk">
+        <div class="sl-title">Type de média</div><select class="sl-sel">
+          <option>Tout</option>
+        </select>
+      </div>
+      <div class="sl-blk">
+        <div class="sl-title">Pays de vente</div><select class="sl-sel">
+          <option>Tout</option>
+          <option>USA</option>
+          <option>France</option>
+        </select>
+      </div>
+      <div class="sl-blk">
+        <div class="sl-title">Année</div><select class="sl-sel">
+          <option>Tout</option>
+          <option>2021</option>
+          <option>2022</option>
+          <option>2023</option>
+          <option>2024</option>
+        </select>
+      </div>
+      <div class="sl-blk">
+        <div class="sl-title">Trimestre</div><select class="sl-sel">
+          <option>Tout</option>
+          <option>T1</option>
+          <option>T2</option>
+          <option>T3</option>
+          <option>T4</option>
+        </select>
+      </div>
+    </aside>
+
+    <!-- ============================
+       PAGE 0 : SYNTHÈSE
+       ============================ -->
+    <div class="page active" id="p0">
+      <!-- KPIs -->
+      <div class="kpi-row kpi-row-4">
+        <div class="kpi">
+          <div class="kpi-val">6 935 €</div>
+          <div class="kpi-lbl">Chiffre d'Affaires</div>
+          <div class="kpi-delta up">▲ +3,2% vs N-1</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">4 757</div>
+          <div class="kpi-lbl">Lignes de Facture</div>
+          <div class="kpi-delta up">▲ +1,8%</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">412</div>
+          <div class="kpi-lbl">Commandes</div>
+          <div class="kpi-delta up">▲ +2,1%</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">1,04 €</div>
+          <div class="kpi-lbl">Prix Unitaire Moyen</div>
+          <div class="kpi-delta down">▼ -0,05 €</div>
+        </div>
+      </div>
+      <!-- Courbe CA + Donut -->
+      <div class="row-2-1">
+        <div class="box">
+          <div class="box-hdr">
+            <div class="box-title">Évolution CA Mensuel vs N-1</div>
+            <div class="box-sub">CA (€) et comparaison année précédente</div>
+          </div>
+          <div class="canvas-wrap"><canvas id="c-syn-line"></canvas></div>
+        </div>
+        <div class="box">
+          <div class="box-hdr">
+            <div class="box-title">Répartition par Canal</div>
+          </div>
+          <div class="canvas-wrap"><canvas id="c-syn-donut"></canvas></div>
+        </div>
+      </div>
+      <!-- Barres pays + Trimestres -->
+      <div class="row-1-1">
+        <div class="box">
+          <div class="box-hdr">
+            <div class="box-title">Top 5 Pays par CA</div>
+            <div class="box-sub">Meilleurs marchés</div>
+          </div>
+          <div class="canvas-wrap"><canvas id="c-syn-pays"></canvas></div>
+        </div>
+        <div class="box">
+          <div class="box-hdr">
+            <div class="box-title">CA par Trimestre</div>
+            <div class="box-sub">Répartition trimestrielle</div>
+          </div>
+          <div class="canvas-wrap"><canvas id="c-syn-trim"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================
+       PAGE 1 : ANALYSE DES VENTES
+       ============================ -->
+    <div class="page" id="p1">
+      <div class="kpi-row kpi-row-5">
+        <div class="kpi">
+          <div class="kpi-val">6 935 €</div>
+          <div class="kpi-lbl">CA Total</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val green">4 604 €</div>
+          <div class="kpi-lbl">CA Online</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val amber">2 331 €</div>
+          <div class="kpi-lbl">CA Magasin</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">16,84 €</div>
+          <div class="kpi-lbl">Panier Moyen</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">59</div>
+          <div class="kpi-lbl">Clients actifs</div>
+        </div>
+      </div>
+      <div class="row-2-1">
+        <div class="box">
+          <div class="box-hdr">
+            <div class="box-title">CA et Prix Unitaire Moyen par Mois</div>
+            <div class="box-sub">Graphique combiné — Impact SCD2 sur les prix</div>
+          </div>
+          <div class="canvas-wrap"><canvas id="c-vt-combo"></canvas></div>
+        </div>
+        <div class="box">
+          <div class="box-hdr">
+            <div class="box-title">CA Online vs Magasin</div>
+            <div class="box-sub">Évolution mensuelle par canal</div>
+          </div>
+          <div class="canvas-wrap"><canvas id="c-vt-canal"></canvas></div>
+        </div>
+      </div>
+      <div class="row-1-1">
+        <div class="box">
+          <div class="box-hdr">
+            <div class="box-title">Volume de Ventes par Jour de la Semaine</div>
+          </div>
+          <div class="canvas-wrap"><canvas id="c-vt-jour"></canvas></div>
+        </div>
+        <div class="box">
+          <div class="box-hdr">
+            <div class="box-title">Top 10 Factures (€)</div>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>N° Facture</th>
+                  <th>Client</th>
+                  <th>Pays</th>
+                  <th>Montant</th>
+                  <th>Canal</th>
+                </tr>
+              </thead>
+              <tbody id="tbl-invoices"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================
+       PAGE 2 : ANALYSE DU CATALOGUE
+       ============================ -->
+    <div class="page" id="p2">
+      <div class="kpi-row kpi-row-4">
+        <div class="kpi">
+          <div class="kpi-val">3 503</div>
+          <div class="kpi-lbl">Pistes (actives)</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">347</div>
+          <div class="kpi-lbl">Albums</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">275</div>
+          <div class="kpi-lbl">Artistes</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">25</div>
+          <div class="kpi-lbl">Genres</div>
+        </div>
+      </div>
+      <div class="row-2-1">
+        <div class="box">
+          <div class="box-hdr">
+            <div class="box-title">Top 10 Genres par CA</div>
+            <div class="box-sub">Chiffre d'affaires généré par genre musical</div>
+          </div>
+          <div class="canvas-wrap"><canvas id="c-cat-genre"></canvas></div>
+        </div>
+        <div class="box">
+          <div class="box-hdr">
+            <div class="box-title">Répartition par Type de Média</div>
+          </div>
+          <div class="canvas-wrap"><canvas id="c-cat-media"></canvas></div>
+        </div>
+      </div>
+      <div class="row-1-1">
+        <div class="box">
+          <div class="box-hdr">
+            <div class="box-title">Top 10 Artistes par CA</div>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Artiste</th>
+                  <th>Pistes</th>
+                  <th>CA (€)</th>
+                  <th>%</th>
+                </tr>
+              </thead>
+              <tbody id="tbl-artistes"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="box">
+          <div class="box-hdr">
+            <div class="box-title">Durée Moyenne des Pistes par Genre (min)</div>
+          </div>
+          <div class="canvas-wrap"><canvas id="c-cat-duree"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================
+       PAGE 3 : ANALYSE DES CLIENTS
+       ============================ -->
+    <div class="page" id="p3">
+      <div class="kpi-row kpi-row-4">
+        <div class="kpi">
+          <div class="kpi-val">59</div>
+          <div class="kpi-lbl">Clients totaux</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val green">117,54 €</div>
+          <div class="kpi-lbl">CA Moyen / Client</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">8,91 €</div>
+          <div class="kpi-lbl">Panier Moyen / Commande</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val amber">15</div>
+          <div class="kpi-lbl">Pays représentés</div>
+        </div>
+      </div>
+      <div class="row-2-1">
+        <div class="box">
+          <div class="box-hdr">
+            <div class="box-title">CA par Pays (Top 10)</div>
+            <div class="box-sub">Répartition géographique du chiffre d'affaires</div>
+          </div>
+          <div class="canvas-wrap"><canvas id="c-cli-pays"></canvas></div>
+        </div>
+        <div class="box">
+          <div class="box-hdr">
+            <div class="box-title">Répartition Clients par Pays</div>
+          </div>
+          <div class="canvas-wrap"><canvas id="c-cli-donut"></canvas></div>
+        </div>
+      </div>
+      <div class="row-1-1">
+        <div class="box">
+          <div class="box-hdr">
+            <div class="box-title">Top 10 Clients par CA</div>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Client</th>
+                  <th>Pays</th>
+                  <th>Commandes</th>
+                  <th>CA (€)</th>
+                  <th>Segment</th>
+                </tr>
+              </thead>
+              <tbody id="tbl-clients"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="box">
+          <div class="box-hdr">
+            <div class="box-title">Fréquence d'achat mensuelle</div>
+            <div class="box-sub">Nb moyen de commandes par mois</div>
+          </div>
+          <div class="canvas-wrap"><canvas id="c-cli-freq"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================
+       PAGE 4 : ANALYSE DES EMPLOYÉS
+       ============================ -->
+    <div class="page" id="p4">
+      <div class="kpi-row kpi-row-4">
+        <div class="kpi">
+          <div class="kpi-val">8</div>
+          <div class="kpi-lbl">Employés</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val green">867 €</div>
+          <div class="kpi-lbl">CA Moyen / Vendeur</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">52</div>
+          <div class="kpi-lbl">Clients / Vendeur (moy.)</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val amber">3</div>
+          <div class="kpi-lbl">Niveaux hiérarchiques</div>
+        </div>
+      </div>
+      <div class="row-1-1">
+        <div class="box">
+          <div class="box-hdr">
+            <div class="box-title">CA par Représentant Commercial</div>
+            <div class="box-sub">Chiffre d'affaires généré par chaque agent</div>
+          </div>
+          <div class="canvas-wrap"><canvas id="c-emp-ca"></canvas></div>
+        </div>
+        <div class="box">
+          <div class="box-hdr">
+            <div class="box-title">Nombre de Clients par Représentant</div>
+          </div>
+          <div class="canvas-wrap"><canvas id="c-emp-cli"></canvas></div>
+        </div>
+      </div>
+      <div class="row-1-1">
+        <div class="box">
+          <div class="box-hdr">
+            <div class="box-title">Performance Mensuelle des Agents</div>
+            <div class="box-sub">Évolution du CA par agent sur l'année</div>
+          </div>
+          <div class="canvas-wrap"><canvas id="c-emp-line"></canvas></div>
+        </div>
+        <div class="box">
+          <div class="box-hdr">
+            <div class="box-title">Détail des Représentants</div>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Agent</th>
+                  <th>Poste</th>
+                  <th>Clients</th>
+                  <th>CA (€)</th>
+                  <th>Perf.</th>
+                </tr>
+              </thead>
+              <tbody id="tbl-emp"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /workspace -->
+
+  <script>
+    /* ── UTILS ── */
+    const C = id => document.getElementById(id).getContext('2d');
+    const COLS = {
+      blue: '#2563EB', dk: '#1E40AF', lt: '#60A5FA', teal: '#0D9488', tealF: 'rgba(13,148,136,.10)',
+      blueF: 'rgba(37,99,235,.12)', grid: '#F1F5F9', pal: ['#1E3A8A', '#1E40AF', '#1D4ED8', '#2563EB', '#3B82F6', '#60A5FA', '#93C5FD', '#BFDBFE', '#DBEAFE', '#EFF6FF']
+    };
+    Chart.defaults.font.family = "'Segoe UI',sans-serif";
+    Chart.defaults.color = '#475569';
+    const ax = { grid: { color: COLS.grid, drawBorder: false }, ticks: { font: { size: 10 } } };
+    const noLegend = { plugins: { legend: { display: false } } };
+
+    /* ── TAB SWITCH ── */
+    function switchTab(i) {
+      document.querySelectorAll('.tab').forEach((t, j) => t.classList.toggle('active', i === j));
+      document.querySelectorAll('.page').forEach((p, j) => p.classList.toggle('active', i === j));
+    }
+
+    /* ════════════════════════════
+       PAGE 0 – SYNTHÈSE
+    ════════════════════════════ */
+    new Chart(C('c-syn-line'), {
+      type: 'line', data: {
+        labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
+        datasets: [
+          { label: 'CA N-1', data: [510, 540, 495, 610, 530, 520, 505, 608, 565, 572, 530, 615], borderColor: '#94A3B8', backgroundColor: 'transparent', borderDash: [4, 4], borderWidth: 1.5, pointRadius: 2, tension: .4 },
+          { label: 'CA', data: [527, 563, 528, 646, 570, 550, 530, 641, 589, 595, 553, 638], borderColor: COLS.teal, backgroundColor: COLS.tealF, fill: true, borderWidth: 2, pointRadius: 3, pointBackgroundColor: '#fff', pointBorderColor: COLS.teal, pointBorderWidth: 2, tension: .4 }
+        ]
+      }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { ...ax } }, plugins: { legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 8, font: { size: 10 } } } } }
+    });
+
+    new Chart(C('c-syn-donut'), {
+      type: 'doughnut', data: {
+        labels: ['Online', 'Magasin'],
+        datasets: [{ data: [66.4, 33.6], backgroundColor: [COLS.dk, COLS.lt], borderWidth: 2, borderColor: '#fff', hoverOffset: 4 }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 10 } } } }
+    });
+
+    new Chart(C('c-syn-pays'), {
+      type: 'bar', data: {
+        labels: ['USA', 'Canada', 'Brazil', 'France', 'Germany'],
+        datasets: [{ data: [1485, 893, 712, 691, 394], backgroundColor: COLS.pal, borderRadius: 3, barPercentage: .7 }]
+      },
+      options: { ...noLegend, responsive: true, maintainAspectRatio: false, indexAxis: 'y', scales: { x: { ...ax }, y: { grid: { display: false } } } }
+    });
+
+    new Chart(C('c-syn-trim'), {
+      type: 'bar', data: {
+        labels: ['T1', 'T2', 'T3', 'T4'],
+        datasets: [{ data: [1617, 1771, 1759, 1788], backgroundColor: [COLS.pal[0], COLS.pal[2], COLS.pal[3], COLS.pal[4]], borderRadius: 4, barPercentage: .6 }]
+      },
+      options: { ...noLegend, responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { ...ax } } }
+    });
+
+    /* ════════════════════════════
+       PAGE 1 – ANALYSE DES VENTES
+    ════════════════════════════ */
+    new Chart(C('c-vt-combo'), {
+      type: 'bar', data: {
+        labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
+        datasets: [
+          { type: 'bar', label: 'CA (€)', data: [527, 563, 528, 640, 570, 550, 530, 641, 589, 595, 553, 638], backgroundColor: COLS.blueF, borderColor: COLS.blue, borderWidth: 1.5, yAxisID: 'y', borderRadius: 3 },
+          { type: 'line', label: 'Prix moyen (€)', data: [1.05, 1.05, 1.04, 1.05, 1.03, 1.03, 1.02, 1.05, 1.05, 1.04, 1.01, 1.02], borderColor: COLS.teal, backgroundColor: 'transparent', borderWidth: 2.5, yAxisID: 'y2', pointRadius: 3, pointBackgroundColor: '#fff', pointBorderColor: COLS.teal, pointBorderWidth: 2, tension: .4 }
+        ]
+      }, options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: {
+          x: { grid: { display: false }, title: { display: true, text: 'MOIS', font: { size: 9 } } },
+          y: { ...ax, title: { display: true, text: 'CA (€)', font: { size: 9 } } },
+          y2: { position: 'right', grid: { display: false }, title: { display: true, text: 'Prix moyen (€)', font: { size: 9 } }, ticks: { font: { size: 9 } } }
+        }, plugins: { legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 8, font: { size: 10 } } } }
+      }
+    });
+
+    new Chart(C('c-vt-canal'), {
+      type: 'bar', data: {
+        labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
+        datasets: [
+          { label: 'Online', data: [360, 380, 350, 430, 385, 370, 360, 430, 395, 400, 370, 430], backgroundColor: COLS.dk, borderRadius: 3, barPercentage: .8 },
+          { label: 'Magasin', data: [167, 183, 178, 210, 185, 180, 170, 211, 194, 195, 183, 208], backgroundColor: COLS.lt, borderRadius: 3, barPercentage: .8 }
+        ]
+      }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false }, stacked: false }, y: { ...ax } }, plugins: { legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 8, font: { size: 10 } } } } }
+    });
+
+    new Chart(C('c-vt-jour'), {
+      type: 'bar', data: {
+        labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+        datasets: [{ data: [820, 980, 870, 1010, 950, 750, 680], backgroundColor: COLS.pal.slice(0, 7), borderRadius: 4, barPercentage: .75 }]
+      },
+      options: { ...noLegend, responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { ...ax } } }
+    });
+
+    // Table factures
+    const invData = [['INV-001', 'Helena Holý', 'Czech Rep.', '25,86 €', 'Online'], ['INV-002', 'Leonie Köhler', 'Germany', '18,86 €', 'Magasin'], ['INV-003', 'François Tremblay', 'Canada', '23,86 €', 'Online'], ['INV-004', 'Bjørn Hansen', 'Norway', '21,86 €', 'Online'], ['INV-005', 'Frantisek Wichterlová', 'Czech Rep.', '28,86 €', 'Magasin'], ['INV-006', 'Helena Holý', 'Czech Rep.', '25,86 €', 'Online'], ['INV-007', 'Astrid Gruber', 'Austria', '13,86 €', 'Online'], ['INV-008', 'Daan Peeters', 'Belgium', '17,86 €', 'Magasin'], ['INV-009', 'Kara Nielsen', 'Denmark', '15,86 €', 'Online'], ['INV-010', 'Eduardo Martins', 'Brazil', '8,91 €', 'Online']];
+    const tblI = document.getElementById('tbl-invoices');
+    invData.forEach(r => { const tr = document.createElement('tr'); tr.innerHTML = `<td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td class="num"><b>${r[3]}</b></td><td><span class="badge ${r[4] === 'Online' ? 'badge-b' : 'badge-g'}">${r[4]}</span></td>`; tblI.appendChild(tr); });
+
+    /* ════════════════════════════
+       PAGE 2 – CATALOGUE
+    ════════════════════════════ */
+    const genres = ['Rock', 'Latin', 'Metal', 'Alternative', 'Jazz', 'Blues', 'TV Shows', 'Classical', 'Reggae', 'Hip Hop'];
+    const genreCA = [1850, 1240, 890, 760, 620, 510, 480, 390, 320, 280];
+    new Chart(C('c-cat-genre'), {
+      type: 'bar', data: { labels: genres, datasets: [{ data: genreCA, backgroundColor: COLS.pal, borderRadius: 3, barPercentage: .75 }] },
+      options: { ...noLegend, responsive: true, maintainAspectRatio: false, indexAxis: 'y', scales: { x: { ...ax }, y: { grid: { display: false } } } }
+    });
+
+    new Chart(C('c-cat-media'), {
+      type: 'doughnut', data: {
+        labels: ['MPEG audio', 'Protected AAC', 'AAC audio', 'Video', 'Purchased AAC'],
+        datasets: [{ data: [52, 21, 14, 8, 5], backgroundColor: [COLS.pal[0], COLS.pal[2], COLS.pal[4], COLS.pal[6], COLS.pal[8]], borderWidth: 2, borderColor: '#fff' }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 10, font: { size: 9 } } } } }
+    });
+
+    const artData = [['Iron Maiden', '213', '340 €', '9,8%'], ['U2', '135', '214 €', '6,2%'], ['Metallica', '112', '178 €', '5,1%'], ['Led Zeppelin', '114', '181 €', '5,2%'], ['Deep Purple', '92', '146 €', '4,2%'], ['Faith No More', '81', '129 €', '3,7%'], ['Lost', '92', '146 €', '4,2%'], ['Incognito', '58', '92 €', '2,6%'], ['Foo Fighters', '58', '92 €', '2,6%'], ['Audioslave', '40', '64 €', '1,8%']];
+    const tblA = document.getElementById('tbl-artistes');
+    artData.forEach(r => { const tr = document.createElement('tr'); tr.innerHTML = `<td><b>${r[0]}</b></td><td class="num">${r[1]}</td><td class="num">${r[2]}</td><td class="num"><span class="badge badge-b">${r[3]}</span></td>`; tblA.appendChild(tr); });
+
+    new Chart(C('c-cat-duree'), {
+      type: 'bar', data: {
+        labels: ['Classical', 'Jazz', 'Opera', 'TV Shows', 'Metal', 'Rock', 'Blues'],
+        datasets: [{ data: [7.2, 5.8, 4.9, 45.1, 4.1, 4.0, 3.7], backgroundColor: COLS.pal.slice(0, 7), borderRadius: 3, barPercentage: .7 }]
+      },
+      options: { ...noLegend, responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { ...ax, title: { display: true, text: 'Durée (min)', font: { size: 9 } } } } }
+    });
+
+    /* ════════════════════════════
+       PAGE 3 – CLIENTS
+    ════════════════════════════ */
+    new Chart(C('c-cli-pays'), {
+      type: 'bar', data: {
+        labels: ['USA', 'Canada', 'France', 'Brazil', 'Germany', 'UK', 'Czech Rep.', 'India', 'Portugal', 'Chile'],
+        datasets: [{ data: [1040, 525, 348, 312, 295, 270, 248, 210, 195, 178], backgroundColor: COLS.pal, borderRadius: 3, barPercentage: .7 }]
+      },
+      options: { ...noLegend, responsive: true, maintainAspectRatio: false, indexAxis: 'y', scales: { x: { ...ax }, y: { grid: { display: false } } } }
+    });
+
+    new Chart(C('c-cli-donut'), {
+      type: 'doughnut', data: {
+        labels: ['Amériques', 'Europe', 'Asie/Océanie'],
+        datasets: [{ data: [48, 38, 14], backgroundColor: [COLS.pal[1], COLS.pal[3], COLS.pal[5]], borderWidth: 2, borderColor: '#fff' }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 10 } } } }
+    });
+
+    const cliData = [['Helena Holý', 'Czech Rep.', '7', '49,62 €', 'VIP'], ['Leonie Köhler', 'Germany', '7', '47,62 €', 'VIP'], ['François Tremblay', 'Canada', '7', '46,62 €', 'Gold'], ['Bjørn Hansen', 'Norway', '7', '45,62 €', 'Gold'], ['Frantisek Wichterlová', 'Czech Rep.', '6', '44,62 €', 'Gold'], ['Helena Holý', 'Czech Rep.', '6', '43,62 €', 'Silver'], ['Astrid Gruber', 'Austria', '6', '43,62 €', 'Silver'], ['Daan Peeters', 'Belgium', '6', '41,62 €', 'Silver'], ['Kara Nielsen', 'Denmark', '5', '39,62 €', 'Silver'], ['Eduardo Martins', 'Brazil', '5', '38,62 €', 'Silver']];
+    const tblC = document.getElementById('tbl-clients');
+    cliData.forEach(r => { const b = r[4] === 'VIP' ? 'badge-r' : r[4] === 'Gold' ? 'badge-g' : 'badge-b'; const tr = document.createElement('tr'); tr.innerHTML = `<td><b>${r[0]}</b></td><td>${r[1]}</td><td class="num">${r[2]}</td><td class="num"><b>${r[3]}</b></td><td><span class="badge ${b}">${r[4]}</span></td>`; tblC.appendChild(tr); });
+
+    new Chart(C('c-cli-freq'), {
+      type: 'line', data: {
+        labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
+        datasets: [{ data: [38, 41, 36, 48, 42, 40, 37, 47, 43, 44, 40, 46], borderColor: COLS.blue, backgroundColor: COLS.blueF, fill: true, borderWidth: 2, pointRadius: 3, pointBackgroundColor: '#fff', pointBorderColor: COLS.blue, tension: .4 }]
+      },
+      options: { ...noLegend, responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { ...ax, title: { display: true, text: 'Nb commandes', font: { size: 9 } } } } }
+    });
+
+    /* ════════════════════════════
+       PAGE 4 – EMPLOYÉS
+    ════════════════════════════ */
+    const agents = ['Jane Peacock', 'Margaret Park', 'Steve Johnson'];
+    const agentCA = [1731, 1584, 1392];
+    const agentCli = [21, 20, 18];
+    new Chart(C('c-emp-ca'), {
+      type: 'bar', data: { labels: agents, datasets: [{ data: agentCA, backgroundColor: [COLS.pal[1], COLS.pal[3], COLS.pal[5]], borderRadius: 5, barPercentage: .5 }] },
+      options: { ...noLegend, responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { ...ax, title: { display: true, text: 'CA (€)', font: { size: 9 } } } } }
+    });
+
+    new Chart(C('c-emp-cli'), {
+      type: 'bar', data: { labels: agents, datasets: [{ data: agentCli, backgroundColor: [COLS.pal[2], COLS.pal[4], COLS.lt], borderRadius: 5, barPercentage: .5 }] },
+      options: { ...noLegend, responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { ...ax, title: { display: true, text: 'Nb clients', font: { size: 9 } } } } }
+    });
+
+    new Chart(C('c-emp-line'), {
+      type: 'line', data: {
+        labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
+        datasets: [
+          { label: 'Jane Peacock', data: [148, 155, 143, 175, 158, 151, 144, 173, 161, 163, 150, 171], borderColor: COLS.pal[1], backgroundColor: 'transparent', borderWidth: 2, pointRadius: 2, tension: .4 },
+          { label: 'Margaret Park', data: [135, 142, 131, 161, 144, 139, 133, 158, 147, 149, 138, 157], borderColor: COLS.pal[3], backgroundColor: 'transparent', borderWidth: 2, pointRadius: 2, tension: .4 },
+          { label: 'Steve Johnson', data: [118, 125, 115, 141, 127, 121, 116, 138, 129, 130, 121, 137], borderColor: COLS.lt, backgroundColor: 'transparent', borderWidth: 2, pointRadius: 2, tension: .4 }
+        ]
+      }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { ...ax } }, plugins: { legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 8, font: { size: 10 } } } } }
+    });
+
+    const empData = [['Jane Peacock', 'Sales Support Agent', '21', '1 731 €'], ['Margaret Park', 'Sales Support Agent', '20', '1 584 €'], ['Steve Johnson', 'Sales Support Agent', '18', '1 392 €'], ['Nancy Edwards', 'Sales Manager', '—', '—'], ['Andrew Adams', 'General Manager', '—', '—']];
+    const tblE = document.getElementById('tbl-emp');
+    empData.forEach(r => {
+      const perf = r[3] !== '—' ? (parseFloat(r[3].replace(/[^0-9]/g, '')) >= 1700 ? 'badge-r' : parseFloat(r[3].replace(/[^0-9]/g, '')) >= 1500 ? 'badge-g' : 'badge-b') : '';
+      const pfTxt = r[3] !== '—' ? (parseFloat(r[3].replace(/[^0-9]/g, '')) >= 1700 ? 'Top' : 'Medium') : '—';
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td><b>${r[0]}</b></td><td>${r[1]}</td><td class="num">${r[2]}</td><td class="num"><b>${r[3]}</b></td><td>${perf ? `<span class="badge ${perf}">${pfTxt}</span>` : '—'}</td>`;
+      tblE.appendChild(tr);
+    });
+  </script>
+</body>
+
+</html>
