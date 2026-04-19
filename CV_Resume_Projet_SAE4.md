@@ -1,16 +1,20 @@
-# PROJET : DÉVELOPPEMENT D'UNE SOLUTION DÉCISIONNELLE (BUSINESS INTELLIGENCE)
-**Mots-clés :** Data Engineering, ETL, MS SQL Server, SSIS, Power BI, Python, Modélisation en étoile, SCD Type 2.
+DÉVELOPPEMENT D'UNE ARCHITECTURE DÉCISIONNELLE (BUSINESS INTELLIGENCE) - DE BOUT EN BOUT
+Environnement Technique : Microsoft SQL Server, SSIS, Power BI, DAX, Python, Git.
 
-*Conception et implémentation complète d'une infrastructure Data (de la base transactionnelle jusqu'au tableau de bord de direction) pour l'analyse de données de ventes omnicanales.*
+Conception et mise en production d'une infrastructure Data complète visant à consolider les ventes omnicanales (Magasins physiques et E-commerce) pour la prise de décision stratégique.
 
-### 🛠️ Réalisations Techniques :
-- **Architecture ETL & Pipelines Data :** Création d'un pipeline étanche en 3 couches (Staging Area, ODS, Data Warehouse) avec SQL Server Integration Services (SSIS) pour extraire, nettoyer et consolider des données hétérogènes (Magasin physique & Vente en ligne).
-- **Modélisation Avancée (Data Warehouse) :** Modélisation d'un data warehouse en étoile pur. Dénormalisation de données complexes (pistes, albums, genres) et gestion des relations Many-to-Many via table Bridge (Playlists).
-- **Gestion d'historique (Slowly Changing Dimensions) :** Paramétrage d'un flux SCD Type 2 garantissant la traçabilité temporelle des prix, évitant ainsi les distorsions analytiques sur le chiffre d'affaires.
-- **Reporting & Data Visualisation (DAX / Power BI) :** Conception d’un tableau de bord de direction interactif structuré en 5 axes (Synthèse, Ventes, Catalogue, RH, Clients) permettant une fouille de données fine sur le CA et la performance omnicanale.
-- **Automatisation & Qualité :** Orchestration via un Master Package, utilisation de Lookups pour l'intégrité référentielle, et génération programmatique de rapports PDF via Python.
+RÉALISATIONS TECHNIQUES ET INGÉNIERIE DE DONNÉES :
+- Conception d'un pipeline ETL 3-Tiers (Staging Area, ODS, Data Warehouse) via SSIS pour l'extraction, le nettoyage (Data Cleansing) et la fiabilisation de données transactionnelles hétérogènes.
+- Modélisation de l'entrepôt de données en schéma en étoile pur : dénormalisation stratégique des structures hiérarchiques lourdes pour réduire les temps de latence au requêtage.
+- Résolution architecturale des relations complexes (Many-to-Many) via l'implémentation de tables Bridge (jonction des Playlists).
+- Ingénierie de l'historisation (Slowly Changing Dimensions - SCD Type 2) appliquée aux tarifs pour figer l'historique des prix de vente et garantir l'intégrité comptable du chiffre d'affaires analytique.
+- Centralisation des environnements offline et online via des opérations Union All optimisées dans la table de faits.
 
-### 🎯 Impact & Compétences Développées :
-- Vision "End-to-End" du cycle de vie de la Data en entreprise.
-- Rigueur dans la résolution d'anomalies de typage de données et l'optimisation des requêtes.
-- Capacité avérée à traduire un besoin Métier (Direction/Management) en leviers techniques opérationnels (Modélisation, ETL, Dataviz).
+INTELLIGENCE D'AFFAIRES & REPORTING :
+- Conception d'un environnement analytique Power BI interactif axé sur 5 dimensions métiers (Performances Ventes, Analyse Catalogue, Rétention Clientèle, Suivi RH et Synthèse Financière).
+- Modélisation tabulaire VertiPaq et création de mesures analytiques complexes via DAX (Time Intelligence, analyse de cohorte).
+- Automatisation programmatique (via Python) de la génération et distribution de rapports de synthèse au format PDF.
+
+VALEUR AJOUTÉE ET COMPÉTENCES VALIDÉES :
+- Maîtrise totale du cycle de vie de la donnée : de la résolution de typage strict des tables de production (DDL/DML) jusqu'à la création d'interfaces de pilotage exécutif.
+- Capacité démontrée à traduire un besoin métier stratégique en solutions techniques opérationnelles, robustes et documentées.
